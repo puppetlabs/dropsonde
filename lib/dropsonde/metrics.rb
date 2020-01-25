@@ -4,11 +4,13 @@ class Dropsonde::Metrics
   extend LittlePlugger( :path => 'dropsonde/metrics', :module => Dropsonde::Metrics)
 
   def initialize
+    blacklist = Dropsonde.settings[:blacklist]
+    Dropsonde::Metrics.disregard_plugins(*blacklist) if blacklist
     Dropsonde::Metrics.initialize_plugins
   end
 
   def schema
-    schema = []
+    schema = skeleton_schema
     Dropsonde::Metrics.plugins.each do |name, plugin|
       schema.concat(sanity_check_schema(plugin))
     end
@@ -17,8 +19,8 @@ class Dropsonde::Metrics
   end
 
   def preview
-    str  = "Puppet Telemetry Report Preview\n"
-    str << "===============================\n"
+    str  = "                      Puppet Telemetry Report Preview\n"
+    str << "                      ===============================\n\n"
     Dropsonde::Metrics.plugins.each do |name, plugin|
       schema = plugin.schema
 
@@ -27,27 +29,39 @@ class Dropsonde::Metrics
       plugin.cleanup
 
       str << plugin.name+"\n"
-      str << plugin.description+"\n"
+      str << "-------------------------------\n"
+      str << plugin.description
       data.each do |row|
         key    = row.keys.first
         values = row.values.first
 
         desc = schema.find {|item| item[:name].to_sym == key.to_sym}[:description]
         str << "- #{key}: #{desc}\n"
-        str << "    #{values}\n"
+        values.each do |item|
+          str << "    #{item}\n"
+        end
       end
-      str << "-------------------------------\n\n"
+      str << "\n\n"
     end
     str
   end
 
   def report
-    results = []
+
+    snapshots = {}
     Dropsonde::Metrics.plugins.each do |name, plugin|
       plugin.setup
-      results.concat(sanity_check_data(plugin))
+      sanity_check_data(plugin).each do |row|
+        snapshots[row.keys.first] = {
+          'value'     => row.values.first,
+          'timestamp' => Time.now.iso8601,
+        }
+      end
       plugin.cleanup
     end
+
+    results = skeleton_report
+    results[:'self-service-analytics'][:snapshots] = snapshots
     results
   end
 
@@ -87,5 +101,38 @@ class Dropsonde::Metrics
     dupes = keys.select{ |e| keys.count(e) > 1 }.uniq
 
     raise "The schema defines duplicate keys: #{dupes}" unless dupes.empty?
+  end
+
+  def skeleton_schema
+    [
+      {
+        "description": "An ID that's unique for each checkin to Dujour.",
+        "mode": "NULLABLE",
+        "name": "message_id",
+        "type": "STRING"
+      },
+      {
+        "description": "Version of the project.",
+        "mode": "NULLABLE",
+        "name": "version",
+        "type": "STRING"
+      },
+      {
+        "description": "Time the checkin to Dujour occurred.",
+        "mode": "NULLABLE",
+        "name": "timestamp",
+        "type": "TIMESTAMP"
+      }
+    ]
+  end
+
+  def skeleton_report
+    {
+      "product": "popularity-module",
+      "version": "1.0.0",
+      "self-service-analytics": {
+        "snapshots": { }
+      }
+    }
   end
 end

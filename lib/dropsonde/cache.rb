@@ -28,6 +28,20 @@ class Dropsonde::Cache
     @@cache['modules']
   end
 
+  def self.forgeModule?(mod)
+    case mod
+    when Puppet::Module
+      modname = mod.forge_slug
+    when Hash
+      modname = mod[:name] || mod['name']
+    when String
+      modname = mod
+    end
+    return unless modname
+
+    modules.include? modname.tr('/','-')
+  end
+
   def self.update
     iter   = PuppetForge::Module.all(:sort_by => 'latest_release')
     newest = DateTime.parse(@@cache['timestamp'])
@@ -40,9 +54,8 @@ class Dropsonde::Cache
 
       @@cache['modules'].concat iter.map {|mod| mod.slug }
 
-      puts iter.offset
-
       iter = iter.next
+      print '.'
     end
     @@cache['modules'].sort!
     @@cache['modules'].uniq!
@@ -52,6 +65,8 @@ class Dropsonde::Cache
 
   def self.autoupdate
     return unless @@autoupdate
+
+    update unless File.file? @@path
 
     if (Date.today - File.mtime(@@path).to_date).to_i > @@ttl
       update

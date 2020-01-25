@@ -12,10 +12,10 @@ class Dropsonde
   config_file '.config/dropsonde.rc'
 
   desc 'Verbose logging'
-  switch [:v, :verbose]
+  switch [:verbose, :v]
 
   desc 'Auto update the Forge module name cache if expired'
-  switch [:u, :update], :default_value => true
+  switch [:update], :default_value => true
 
   desc 'Path to cache directory'
   flag [:cachepath], :default_value => "#{Puppet.settings[:vardir]}/dropsonde"
@@ -23,7 +23,11 @@ class Dropsonde
   desc 'Forge module cache ttl in days'
   flag [:ttl], :default_value => 7, :type => Integer
 
+  desc 'List of metrics to omit'
+  flag [:blacklist, :b], :type => Array
+
   pre do |global, command, options, args|
+    Dropsonde.settings = global
     Dropsonde::Cache.init(global[:cachepath], global[:ttl], global[:update])
   end
 
