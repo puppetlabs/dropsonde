@@ -1,17 +1,18 @@
 class Dropsonde::Metrics::Dependencies
   def self.initialize_modules
-    # require any libraries needed here -- puppet is already initialized
+    # require any libraries needed here -- no need to load puppet; it's already initialized
   end
 
   def self.description
     <<~EOF
-      This group of metrics discovered dependencies between modules in all
+      This group of metrics discovers dependencies between modules in all
       environments. It will omit dependencies on private modules.
     EOF
   end
 
   def self.schema
     # return an array of hashes of a partial schema to be merged into the complete schema
+    # See https://cloud.google.com/bigquery/docs/schemas#specifying_a_json_schema_file
     [
       {
         "fields": [
@@ -41,7 +42,7 @@ class Dropsonde::Metrics::Dependencies
   end
 
   def self.run
-    # return a hash of data to be merged into the combined checkin
+    # return an array of hashes representing the data to be merged into the combined checkin
     environments = Puppet.lookup(:environments).list.map{|e|e.name}
     modules = environments.map do |env|
       Puppet.lookup(:environments).get(env).modules
@@ -50,12 +51,10 @@ class Dropsonde::Metrics::Dependencies
     # we want only PUBLIC modules that PRIVATE modules depend on
     dependencies = modules.map do|mod|
       next unless mod.dependencies
-      next if Dropsonde::Cache.modules.include? mod.metadata['name']
+      next if Dropsonde::Cache.forgeModule? mod  # skip unless this is a private module
 
-      # canonicalize to the 'user-project' style of name
-      deps = mod.dependencies.map{|mod| mod['name'].tr!('/','-'); mod}
-
-      deps.select {|mod| Dropsonde::Cache.modules.include? mod['name']}
+      # and return a list of all public modules it depends on
+      mod.dependencies.select {|mod| Dropsonde::Cache.forgeModule? mod }
     end.flatten.compact
 
     [
