@@ -24,7 +24,17 @@ This is distributed as a Ruby gem. Simply `gem install dropsonde`
 
 ## Configuration
 
-Any command line arguments can also be specified in `~/.config/dropsonde.rc`
+Any command line arguments can also be specified in `~/.config/dropsonde.rc`.
+For example the config file below will disable Forge module cache updating and
+will not report the `:puppetfiles` metrics.
+
+
+``` yaml
+---
+:update: false
+:blacklist:
+  - puppetfiles
+```
 
 
 ## Running
@@ -36,6 +46,8 @@ Run `dropsonde --help` to see usage information.
     * Annotated with descriptions of each plugin and each metric gathered.
 * `schema`
     * Generate and print out the complete combined schema.
+* `list`
+    * See a quick list of the available metrics and what they do.
 * `submit`
     * Generate and submit a telemetry report. This will be exactly the same as
       the human readable form, just in JSON format.

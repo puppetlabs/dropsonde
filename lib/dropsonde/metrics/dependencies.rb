@@ -1,6 +1,7 @@
 class Dropsonde::Metrics::Dependencies
-  def self.initialize_modules
+  def self.initialize_dependencies
     # require any libraries needed here -- no need to load puppet; it's already initialized
+    # All plugins are initialized before any metrics are generated.
   end
 
   def self.description

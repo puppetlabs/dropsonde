@@ -23,6 +23,11 @@ class Dropsonde
     puts JSON.pretty_generate(Dropsonde::Metrics.new.schema)
   end
 
+  def self.list_metrics
+    puts
+    puts Dropsonde::Metrics.new.list
+  end
+
   def self.generate_report
     puts
     puts Dropsonde::Metrics.new.preview

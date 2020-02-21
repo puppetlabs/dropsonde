@@ -4,9 +4,20 @@ class Dropsonde::Metrics
   extend LittlePlugger( :path => 'dropsonde/metrics', :module => Dropsonde::Metrics)
 
   def initialize
-    blacklist = Dropsonde.settings[:blacklist]
-    Dropsonde::Metrics.disregard_plugins(*blacklist) if blacklist
+    Dropsonde::Metrics.disregard_plugins(*Dropsonde.settings[:blacklist])
     Dropsonde::Metrics.initialize_plugins
+  end
+
+  def list
+    str  = "                    Loaded telemetry plugins\n"
+    str << "                 ===============================\n\n"
+    Dropsonde::Metrics.plugins.each do |name, plugin|
+      str << name.to_s
+      str << "\n--------\n"
+      str << plugin.description.strip
+      str << "\n\n"
+    end
+    str
   end
 
   def schema
@@ -47,7 +58,6 @@ class Dropsonde::Metrics
   end
 
   def report
-
     snapshots = {}
     Dropsonde::Metrics.plugins.each do |name, plugin|
       plugin.setup

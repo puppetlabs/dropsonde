@@ -1,6 +1,7 @@
 class Dropsonde::Metrics::Modules
   def self.initialize_modules
     # require any libraries needed here -- no need to load puppet; it's already initialized
+    # All plugins are initialized before any metrics are generated.
   end
 
   def self.description
@@ -94,7 +95,7 @@ class Dropsonde::Metrics::Modules
 
         {
           :name  => klass['title'],
-          :count => results.select {|row| row['title'] == klass['title']}.count,
+          :count => results.count {|row| row['title'] == klass['title']},
         }
       end.compact.uniq
     else

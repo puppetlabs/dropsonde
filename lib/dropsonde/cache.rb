@@ -12,7 +12,7 @@ class Dropsonde::Cache
     @@ttl  = ttl
     @@autoupdate = autoupdate
 
-    if File.exist? @@path
+    if File.file? @@path
       @@cache = JSON.parse(File.read(@@path))
     else
       @@cache = {

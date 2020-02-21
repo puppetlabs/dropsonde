@@ -1,11 +1,17 @@
 module Puppet
   class Module
-    def forge_module?
-      Dropsonde::Cache.forgeModule? self
+
+    unless Module.method_defined? :"forge_module?"
+      def forge_module?
+        Dropsonde::Cache.forgeModule? self
+      end
     end
 
-    def forge_slug
-      self.forge_name.tr('/','-') rescue nil
+    unless Module.method_defined? :forge_slug
+      def forge_slug
+        self.forge_name.tr('/','-') rescue nil
+      end
     end
+
   end
 end

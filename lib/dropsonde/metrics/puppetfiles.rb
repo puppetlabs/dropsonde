@@ -1,6 +1,7 @@
 class Dropsonde::Metrics::Puppetfiles
   def self.initialize_puppetfiles
     # require any libraries needed here -- no need to load puppet; it's already initialized
+    # All plugins are initialized before any metrics are generated.
     require 'ripper'
   end
 
