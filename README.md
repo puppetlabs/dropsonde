@@ -38,7 +38,7 @@ which public modules and classes are used, and what platforms they're used on.
 It identifies the component classes that your profile modules declares so we can
 better support what you are doing with your profiles, *but without exposing your
 profile names.* The key point here is that it looks for usage patterns for *public
-modules only* and explicitly does its best to your internal code private to you.
+modules only* and explicitly does its best to keep your internal code private to you.
 
 You can see exactly what will be phoned home by running the command:
 
@@ -56,7 +56,7 @@ To mitigate this concern, we aggregate data in a two step process. The data
 submitted by Dropsonde is stored in a private dataset. ACLs limit access to only
 certain number of employees. Then each week, a job runs to generate a sanitized
 and aggregated form of the data for the week which goes into the public dataset
-that all our tooling depends on.
+that all our tooling actually depends on and uses.
 
 With your own Google Cloud account, you can use that [dataset](https://console.cloud.google.com/bigquery?project=puppetlabs.com:api-project-53122606061)
 in your own tooling and you can see/contribute to the aggregation queries in its
