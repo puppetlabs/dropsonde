@@ -9,7 +9,7 @@ class Dropsonde
   Puppet.initialize_settings
 
   program_desc 'A simple telemetry tool for Puppet infrastructures'
-  config_file '.config/dropsonde.rc'
+  config_file '/etc/puppetlabs/telemetry.yaml'
 
   desc 'Verbose logging'
   switch [:verbose, :v]
@@ -25,6 +25,9 @@ class Dropsonde
 
   desc 'List of metrics to omit'
   flag [:blacklist, :b], :type => Array
+
+  desc 'Any number or string used to generate the randomized site ID.'
+  flag [:seed]
 
   pre do |global, command, options, args|
     Dropsonde.settings = global

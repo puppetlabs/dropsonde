@@ -8,6 +8,17 @@ class Dropsonde::Metrics
     Dropsonde::Metrics.initialize_plugins
   end
 
+  def siteid
+    return @siteid if @siteid
+
+    sha2 = Digest::SHA512.new
+    sha2.update Puppet.settings[:certname]
+    sha2.update Puppet.settings[:cacert]
+    sha2.update Dropsonde.settings[:seed] if Dropsonde.settings[:seed]
+    @siteid = sha2.hexdigest
+    @siteid
+  end
+
   def list
     str  = "                    Loaded telemetry plugins\n"
     str << "                 ===============================\n\n"
@@ -16,6 +27,10 @@ class Dropsonde::Metrics
       str << "\n--------\n"
       str << plugin.description.strip
       str << "\n\n"
+    end
+    if Dropsonde.settings[:blacklist]
+      str << "Disabled plugins:\n"
+      str << "  #{Dropsonde.settings[:blacklist].join(', ')}"
     end
     str
   end
@@ -54,6 +69,8 @@ class Dropsonde::Metrics
       end
       str << "\n\n"
     end
+    str << "Site ID:\n"
+    str << siteid
     str
   end
 
@@ -122,6 +139,12 @@ class Dropsonde::Metrics
         "type": "STRING"
       },
       {
+        "description": "A unique identifier for a site, derived as a hash of the CA certificate and optional seed.",
+        "mode": "NULLABLE",
+        "name": "site_id",
+        "type": "BYTES"
+      },
+      {
         "description": "Version of the project.",
         "mode": "NULLABLE",
         "name": "version",
@@ -140,6 +163,7 @@ class Dropsonde::Metrics
     {
       "product": "popularity-module",
       "version": "1.0.0",
+      "site_id": siteid,
       "self-service-analytics": {
         "snapshots": { }
       }
