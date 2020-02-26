@@ -14,9 +14,9 @@ problem and it was relatively difficult choosing between them. Surfacing usage
 data in a way that lets you signal approval simply by using a module is the
 primary goal of this project.
 
-**This means that the best way for you to help yourself find new modules is to
-install this telemetry tool and, along with your peers, share your module usage
-data.**
+> **This means that the best way for you to help yourself find new modules is to
+> install this telemetry tool and, along with your peers, share your module usage
+> data.**
 
 
 ## Design
