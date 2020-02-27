@@ -46,6 +46,20 @@ class Dropsonde
                   :header => {'Content-Type' => 'application/json'},
                   :body   => Dropsonde::Metrics.new.report.to_json
                 )
+
+    if result.status == 200
+      data = JSON.parse(result.body)
+      if data['newer']
+        puts 'A newer version of the telemetry client is available:'
+        puts "  -- #{data['link']}"
+      else
+        puts data['message']
+      end
+    else
+      puts 'Failed to submit report'
+      puts JSON.pretty_generate(result.body) if Dropsonde.settings[:verbose]
+      exit 1
+    end
   end
 
   def self.puppetDB
@@ -58,12 +72,13 @@ class Dropsonde
     server = IniFile.load(config)['main']['server_urls'].split(',').first
 
     @@pdbclient = PuppetDB::Client.new({
-    :server => server,
-    :pem    => {
-        'key'     => Puppet.settings[:hostprivkey],
-        'cert'    => Puppet.settings[:hostcert],
-        'ca_file' => Puppet.settings[:localcacert],
-    }})
+      :server => server,
+      :pem    => {
+          'key'     => Puppet.settings[:hostprivkey],
+          'cert'    => Puppet.settings[:hostcert],
+          'ca_file' => Puppet.settings[:localcacert],
+      }
+    })
   end
 
 end
