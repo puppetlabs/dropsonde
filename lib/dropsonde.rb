@@ -28,9 +28,16 @@ class Dropsonde
     puts Dropsonde::Metrics.new.list
   end
 
-  def self.generate_report
-    puts
-    puts Dropsonde::Metrics.new.preview
+  def self.generate_report(format)
+    case format
+    when 'json'
+      puts JSON.pretty_generate(Dropsonde::Metrics.new.report)
+    when 'human'
+      puts
+      puts Dropsonde::Metrics.new.preview
+    else
+      raise "unknown format"
+    end
   end
 
   def self.submit_report(endpoint, port)

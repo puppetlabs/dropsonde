@@ -57,9 +57,12 @@ class Dropsonde
 
   desc 'Generate an example telemetry report'
   command :preview do |c|
+    c.desc 'The output format to use'
+    c.flag [:format], :default_value => 'human'
+
     c.action do |global, options, args|
       Dropsonde::Cache.autoupdate
-      Dropsonde.generate_report
+      Dropsonde.generate_report(options[:format])
     end
   end
 

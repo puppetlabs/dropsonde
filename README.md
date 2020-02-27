@@ -16,7 +16,7 @@ primary goal of this project.
 
 > **This means that the best way for you to help yourself find new modules is to
 > install this telemetry tool and, along with your peers, share your module usage
-> data.**
+> data.** ✅
 
 
 ## Design
