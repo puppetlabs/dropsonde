@@ -145,6 +145,12 @@ class Dropsonde::Metrics
         "type": "BYTES"
       },
       {
+        "description": "The name of the product.",
+        "mode": "NULLABLE",
+        "name": "product",
+        "type": "STRING"
+      },
+      {
         "description": "Version of the project.",
         "mode": "NULLABLE",
         "name": "version",
@@ -155,6 +161,12 @@ class Dropsonde::Metrics
         "mode": "NULLABLE",
         "name": "timestamp",
         "type": "TIMESTAMP"
+      },
+      {
+        "description": "IP Address of node checking in to Dujour.",
+        "mode": "NULLABLE",
+        "name": "ip",
+        "type": "STRING"
       }
     ]
   end
