@@ -85,7 +85,9 @@ possible: [privacy@puppet.com](mailto:privacy@puppet.com)
 
 ## Installation
 
-This is distributed as a Ruby gem. Simply `gem install dropsonde`
+This is distributed as a Ruby gem. Simply `gem install dropsonde`. There's a
+[Puppet module](https://github.com/puppetlabs/puppetlabs-dropsonde) to manage it
+if that's more your thing.
 
 
 ## Configuration
