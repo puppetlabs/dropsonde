@@ -69,7 +69,7 @@ class Dropsonde
   desc 'Submit a telemetry report'
   command :submit do |c|
     c.desc 'Telemetry endpoint'
-    c.flag [:endpoint], :default_value => 'https://dev.dujour.k8s.puppet.net'
+    c.flag [:endpoint], :default_value => 'https://prod.dujour.k8s.puppet.net'
 
     c.desc 'Telemetry port'
     c.flag [:port], :default_value => 443, :type => Integer
