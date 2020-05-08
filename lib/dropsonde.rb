@@ -7,6 +7,7 @@ class Dropsonde
   require 'dropsonde/cache'
   require 'dropsonde/metrics'
   require 'dropsonde/monkeypatches'
+  require 'dropsonde/version'
 
   @@pdbclient = nil
   @@settings  = {}

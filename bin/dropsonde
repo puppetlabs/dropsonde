@@ -9,7 +9,8 @@ class Dropsonde
   Puppet.initialize_settings
 
   program_desc 'A simple telemetry tool for Puppet infrastructures'
-  config_file '/etc/puppetlabs/telemetry.yaml'
+  config_file  '/etc/puppetlabs/telemetry.yaml'
+  version      Dropsonde::VERSION
 
   desc 'Verbose logging'
   switch [:verbose, :v]

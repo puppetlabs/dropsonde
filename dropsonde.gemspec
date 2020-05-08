@@ -1,8 +1,10 @@
+$:.unshift File.expand_path("../lib", __FILE__)
 require 'date'
+require 'dropsonde/version'
 
 Gem::Specification.new do |s|
   s.name              = "dropsonde"
-  s.version           = "0.0.1"
+  s.version           = Dropsonde::VERSION
   s.date              = Date.today.to_s
   s.summary           = "A simple telemetry probe for gathering usage information about Puppet infrastructures."
   s.license           = 'Apache 2'
