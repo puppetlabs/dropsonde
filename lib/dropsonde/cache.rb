@@ -43,6 +43,7 @@ class Dropsonde::Cache
   end
 
   def self.update
+    puts "Updating module cache..."
     iter   = PuppetForge::Module.all(:sort_by => 'latest_release')
     newest = DateTime.parse(@@cache['timestamp'])
 
@@ -57,6 +58,7 @@ class Dropsonde::Cache
       iter = iter.next
       print '.'
     end
+    puts
     @@cache['modules'].sort!
     @@cache['modules'].uniq!
 
@@ -66,7 +68,12 @@ class Dropsonde::Cache
   def self.autoupdate
     return unless @@autoupdate
 
-    update unless File.file? @@path
+    unless File.file? @@path
+      puts "Dropsonde caches a list of all Forge modules to ensure that it only reports"
+      puts "usage data on public modules. Generating this cache may take some time on"
+      puts "the first run and you'll see your screen fill up with dots."
+      update
+    end
 
     if (Date.today - File.mtime(@@path).to_date).to_i > @@ttl
       update
