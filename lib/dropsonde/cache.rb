@@ -46,11 +46,11 @@ class Dropsonde::Cache
     iter   = PuppetForge::Module.all(:sort_by => 'latest_release')
     newest = DateTime.parse(@@cache['timestamp'])
 
-    @@cache['timestamp'] = iter.first.created_at
+    @@cache['timestamp'] = iter.first.updated_at
 
     until iter.next.nil?
       # stop once we reach modules we've already cached
-      break if DateTime.parse(iter.first.created_at) <= newest
+      break if DateTime.parse(iter.first.updated_at) <= newest
 
       @@cache['modules'].concat iter.map {|mod| mod.slug }
 
