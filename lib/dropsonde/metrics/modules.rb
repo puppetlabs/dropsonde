@@ -108,6 +108,30 @@ class Dropsonde::Metrics::Modules
     ]
   end
 
+  def self.example
+    # this method is used to generate a table filled with randomized data to
+    # make it easier to write data aggregation queries without access to the
+    # actual private data that users have submitted.
+
+    versions = ['1.3.2', '0.0.1', '0.1.2', '1.0.0', '3.0.2', '7.10', '6.1.0', '2.1.0', '1.4.0']
+    classes = ['', '::Config', '::Service', '::Server', '::Client', '::Packages']
+    [
+      :modules => Dropsonde::Cache.modules
+                                  .sample(rand(100))
+                                  .map {|item| {
+                                    :name    => item.split('-').last,
+                                    :slug    => item,
+                                    :version => versions.sample,
+                                  }},
+      :classes => Dropsonde::Cache.modules
+                                  .sample(rand(500))
+                                  .map {|item| {
+                                    :name  => item.split('-').last.capitalize + classes.sample,
+                                    :count => rand(750),
+                                  }},
+    ]
+  end
+
   def self.cleanup
     # run just after generating this metric
   end

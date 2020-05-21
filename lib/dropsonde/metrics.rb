@@ -78,7 +78,7 @@ class Dropsonde::Metrics
     snapshots = {}
     Dropsonde::Metrics.plugins.each do |name, plugin|
       plugin.setup
-      sanity_check_data(plugin).each do |row|
+      sanity_check_data(plugin, plugin.run).each do |row|
         snapshots[row.keys.first] = {
           'value'     => row.values.first,
           'timestamp' => Time.now.iso8601,
@@ -92,8 +92,26 @@ class Dropsonde::Metrics
     results
   end
 
-  def sanity_check_data(plugin)
-    data = plugin.run
+  def example
+    require 'ipaddr'
+    results = skeleton_report
+    results[:message_id] = generate_guid
+    results[:timestamp]  = rand((Time.now - 60 * 60 * 24 * 365)..Time.now).utc
+    results[:ip]         = IPAddr.new(rand(2**32), Socket::AF_INET)
+    results.delete(:'self-service-analytics')
+
+    Dropsonde::Metrics.plugins.each do |name, plugin|
+      sanity_check_data(plugin, plugin.example).each do |row|
+        results.merge!(row)
+      end
+    end
+
+    results
+  end
+
+  # We accept both the plugin and data gathered from the plugin so that
+  # we can sanitize both data and example data
+  def sanity_check_data(plugin, data)
     keys_data   = data.map {|item| item.keys }.flatten.map(&:to_s)
     keys_schema = plugin.schema.map {|item| item[:name] }
 
@@ -180,5 +198,15 @@ class Dropsonde::Metrics
         "snapshots": { }
       }
     }
+  end
+
+  def generate_guid
+    "%s-%s-%s-%s-%s" % [
+      (0..8).to_a.map{|a| rand(16).to_s(16)}.join,
+      (0..4).to_a.map{|a| rand(16).to_s(16)}.join,
+      (0..4).to_a.map{|a| rand(16).to_s(16)}.join,
+      (0..4).to_a.map{|a| rand(16).to_s(16)}.join,
+      (0..12).to_a.map{|a| rand(16).to_s(16)}.join
+    ]
   end
 end

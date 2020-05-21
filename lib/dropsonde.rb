@@ -63,6 +63,16 @@ class Dropsonde
     end
   end
 
+  def self.generate_example(size, filename)
+    metrics = Dropsonde::Metrics.new
+    File.open(filename, 'w') do |file|
+      for i in 0...size
+        file.write(metrics.example.to_json)
+        file.write("\n")
+      end
+    end
+  end
+
   def self.puppetDB
     return @@pdbclient if @@pdbclient
 

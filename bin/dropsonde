@@ -42,13 +42,6 @@ class Dropsonde
     end
   end
 
-  desc 'Generate a complete schema set'
-  command :schema do |c|
-    c.action do |global, options, args|
-      Dropsonde.generate_schema
-    end
-  end
-
   desc 'List all available metrics'
   command :list do |c|
     c.action do |global, options, args|
@@ -56,7 +49,7 @@ class Dropsonde
     end
   end
 
-  desc 'Generate an example telemetry report'
+  desc 'Preview the telemetry report that will be submitted'
   command :preview do |c|
     c.desc 'The output format to use'
     c.flag [:format], :default_value => 'human'
@@ -80,6 +73,50 @@ class Dropsonde
       Dropsonde.submit_report(options[:endpoint], options[:port])
     end
   end
+
+  desc "Commands useful for developers"
+  command :dev do |t|
+    t.desc 'Open a Pry shell for debugging'
+    t.command :shell do |c|
+      c.action do |global, options, args|
+        require 'pry'
+        binding.pry
+      end
+    end
+
+    t.desc 'Generate a complete schema for all metrics'
+    t.long_desc "This generates the schema that is used to create or update the BigQuery
+                 database. Every report is also validated against this schema before
+                 submission, so you can be assured that this is a complete representation
+                 of what data is collected and run through aggregation filters."
+    t.command :schema do |c|
+      c.action do |global, options, args|
+        Dropsonde.generate_schema
+      end
+    end
+
+    t.desc 'Generate an example of random data to simulate actual reports'
+    t.long_desc "The submitted telemetry reports are treated as sensitive material. Very
+                few people have access to that raw data. Instead, it's run through some
+                data aggregation filters to generate the published statistics we share.
+                Writing those aggregation queries is difficult without data to work with,
+                so this command generates a representative example of random data.
+
+                This is in jsonl format for direct upload to BigQuery."
+    t.command :example do |c|
+      c.desc 'How many rows to generate'
+      c.flag [:size], :default_value => 100
+
+      c.desc 'Filename for the output (in jsonl format).'
+      c.flag [:filename], :default_value => 'example.jsonl'
+
+      c.action do |global, options, args|
+        Dropsonde::Cache.autoupdate
+        Dropsonde.generate_example(options[:size], options[:filename])
+      end
+    end
+  end
+
 end
 
 exit Dropsonde.run(ARGV)

@@ -70,6 +70,22 @@ class Dropsonde::Metrics::Puppetfiles
     ]
   end
 
+  def self.example
+    # this method is used to generate a table filled with randomized data to
+    # make it easier to write data aggregation queries without access to the
+    # actual private data that users have submitted.
+    [
+      :puppetfile_ruby_methods => [
+        {:name => 'require', :count => rand(200)},
+        {:name => 'each',    :count => rand(200)},
+        {:name => 'puts',    :count => rand(200)},
+        {:name => 'select',  :count => rand(200)},
+        {:name => 'reject',  :count => rand(200)},
+        {:name => 'read',    :count => rand(200)},
+      ].shuffle,
+    ]
+  end
+
   def self.cleanup
     # run just after generating this metric
   end
