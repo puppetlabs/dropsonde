@@ -11,7 +11,6 @@ Gem::Specification.new do |s|
   s.license           = 'Apache 2'
   s.email             = "ben.ford@puppet.com"
   s.authors           = ["Ben Ford"]
-  s.has_rdoc          = false
   s.require_path      = "lib"
   s.executables       = %w( dropsonde )
   s.files             = %w( README.md LICENSE )
