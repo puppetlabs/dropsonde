@@ -6,7 +6,7 @@ class Dropsonde
   extend GLI::App
 
   program_desc 'A simple telemetry tool for Puppet infrastructures'
-  config_file  '/etc/puppetlabs/telemetry.yaml'
+  config_file  "#{File.dirname(Puppet.settings[:confdir])}/telemetry.yaml"
   version      Dropsonde::VERSION
 
   desc 'Verbose logging'
