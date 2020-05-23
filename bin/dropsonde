@@ -1,12 +1,9 @@
 #!/usr/bin/env ruby
 require 'gli'
 require 'dropsonde'
-require 'puppet'
 
 class Dropsonde
   extend GLI::App
-
-  Puppet.initialize_settings
 
   program_desc 'A simple telemetry tool for Puppet infrastructures'
   config_file  '/etc/puppetlabs/telemetry.yaml'

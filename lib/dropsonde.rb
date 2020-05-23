@@ -2,12 +2,15 @@ require 'json'
 require 'httpclient'
 require 'puppetdb'
 require 'inifile'
+require 'puppet'
 
 class Dropsonde
   require 'dropsonde/cache'
   require 'dropsonde/metrics'
   require 'dropsonde/monkeypatches'
   require 'dropsonde/version'
+
+  Puppet.initialize_settings
 
   @@pdbclient = nil
   @@settings  = {}
