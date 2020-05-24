@@ -114,8 +114,6 @@ Run `dropsonde --help` to see usage information.
 * `preview`
     * Generate and print out an example telemetry report in human readable form
     * Annotated with descriptions of each plugin and each metric gathered.
-* `schema`
-    * Generate and print out the complete combined schema.
 * `list`
     * See a quick list of the available metrics and what they do.
 * `submit`
@@ -124,6 +122,17 @@ Run `dropsonde --help` to see usage information.
 * `update`
     * Once a week, the list of public modules on the Forge will be updated. This
       command will manually force that cache update to happen.
+
+Developer comands
+
+* `dev example`
+    * To make writing aggregation queries possible without access to the private
+      database, this will generate a randomized example of the dataset. This is
+      in JSONL format, so it can be imported directly into BigQuery.
+* `dev schema`
+    * Generate and print out the complete combined schema of all metrics.
+* `dev shell`
+    * Open up a Pry shell with all the relevant connections open and initialized.
 
 
 ## Architecture
