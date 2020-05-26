@@ -51,7 +51,7 @@ class Dropsonde::Metrics
       schema = plugin.schema
 
       plugin.setup
-      data = sanity_check_data(plugin)
+      data = sanity_check_data(plugin, plugin.run)
       plugin.cleanup
 
       str << plugin.name+"\n"
