@@ -86,18 +86,21 @@ class Dropsonde::Metrics::Modules
     if Dropsonde.puppetDB
       # classes and how many nodes they're enforced on
       results = Dropsonde.puppetDB.request( '',
-        'resources[certname, type, title] { type = "Class" }'
+        'resources[type, title] { type = "Class" }'
       ).data
 
-      # select only classes from public modules
-      classes = results.map do |klass|
-        next unless modules.find {|mod| mod[:name] == klass['title'].split('::').first.downcase }
+      # select only classes from public modules.
+      # Use uniq to reduce the iteration over very large datasets
+      classes = results.uniq.map do |klass|
+        title   = klass['title']
+        modname = title.split('::').first.downcase
+        next unless modules.find {|mod| mod[:name] == modname }
 
         {
-          :name  => klass['title'],
-          :count => results.count {|row| row['title'] == klass['title']},
+          :name  => title,
+          :count => results.count {|row| row['title'] == title},
         }
-      end.compact.uniq
+      end.compact
     else
       classes = []
     end
