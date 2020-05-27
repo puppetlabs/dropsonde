@@ -43,7 +43,7 @@ schema so the system cannot gather any data that's not described in the schema.
 See the full schema of all enabled plugins by running the command:
 
 ```
-$ dropsonde schema
+$ dropsonde dev schema
 ```
 
 All information in the report is keyed off a non-reversible SHA512 hash site-id
