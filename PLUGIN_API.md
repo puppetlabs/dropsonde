@@ -49,7 +49,7 @@ end
 ## Flow of Execution
 
 When Dropsonde starts, it first iterates through and loads each (non-blacklisted)
-plugin and invokes its [initializer](#self.initialize_example). This initializer
+plugin and invokes its [initializer](#selfinitialize_example). This initializer
 is run unconditionally regardless of the operation being performed.
 
 Next, depending the operation being performed, all plugins are iterated through
@@ -61,9 +61,9 @@ and invoke each appropriate hook.
 For the `preview` and `submit` commands, Dropsonde will iterate plugins and invoke
 in this order:
 
-1. `self.setup`
-1. `self.run`
-1. `self.cleanup`
+1. [`self.setup`](#selfsetup)
+1. [`self.run`](#selfrun)
+1. [`self.cleanup`](#selfcleanup)
 
 ## Helper Methods
 
