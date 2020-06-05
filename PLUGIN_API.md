@@ -1,13 +1,58 @@
 # Dropsonde Plugin API
 
-Each metric or family of metrics is exposed by a single metrics plugin. This is
-a Ruby file that lives in `lib/dropsonde/metrics` and defines a single class
-named after its filename. For example, if you wanted to write a plugin to gather
-Puppet Server JVM settings, you might create the class `Dropsonde::Metrics::Jvm`
-in the Ruby file named `lib/dropsonde/metrics/jvm.rb`.
+Each metric or family of metrics is exposed by a single metrics plugin. It is
+is self contained, with its own documentation and validated data schema. All
+plugins in the `Dropsonde::Metrics` namespace will be loaded, except for those
+blacklisted. This means that to collect new metrics, all you need to do is to
+contribute a metrics plugin and wait for data to come in.
 
-Hooks are defined as a series of class methods. A skeleton of a metric plugin,
-showing the available hooks, looks like so, and the hooks are all described below.
+Of course, before you can actually access said data, you'll also need to write some
+[aggregation queries](https://github.com/puppetlabs/dropsonde-aggregation) to expose it!
+
+> ***📍Important note:***<br />
+> We do not collect private information and we only collect information related
+> to the Puppet ecosystem and which can provide benefits to the user for sharing.
+>
+> Examples of things we will not collect include (but are not limited to):
+> * The names of private modules or classes
+> * The names of environments other than standards like dev/staging/prod.
+> * Hostnames or certnames
+> * Custom facts not from Forge modules
+> * Any git data (remotes, committers, etc.) extracted from the control repository.
+>
+> This list will evolve as our understanding of the privacy concerns grows, so
+> refresh your reading of this each time you write a new metric.
+
+
+## Creating a plugin
+
+Start by copying the skeleton file below into a new plugin source file. This
+should be a Ruby file that lives in `lib/dropsonde/metrics` and defines a single
+class named after its filename. For example, if you wanted to write a plugin to
+gather Puppet Server JVM settings, you might create the class
+`Dropsonde::Metrics::Jvm` in the Ruby file named `lib/dropsonde/metrics/jvm.rb`.
+
+Hooks are defined as a series of class methods and each of them is documented
+below. Flesh each method out as needed.
+
+Obviously, you will not be able to _submit data_ until a new version of the client
+is released and the schema incorporated into the submission pipeline. But that's
+not necessary for testing. Dropsonde internally validates each plugin schema and
+ensures that the data gathered matches that schema.
+
+To validate and observe the data your plugin will collect, run:
+
+``` shell
+$ dropsonde preview
+```
+
+You can also get it in JSON format for machine validation with:
+
+``` shell
+$ dropsonde preview --format=json
+```
+
+### Metric plugin skeleton
 
 ``` ruby
 class Dropsonde::Metrics::Demo
@@ -98,45 +143,6 @@ supplemented with
 * `mod.forge_module?`
     * Returns a Boolean value indicating whether the module exists on the Forge.
 
-## Optional Hooks
-
-These methods are provided for convenience as a way to logically group code. It
-is possible to do initialization, setup, and teardown all in the `.run` hook, but
-this separation allows you to make your code more straightforward to read if you'd
-like to.
-
-### `self.initialize_example`
-
-* parameters: none
-* return value: none
-
-This method is the initializer. It should be named after the metric class. So in
-the `Dropsonde::Metrics::Jvm` example, it would be called `self.initialize_jvm`.
-
-When Dropsonde starts up, it first iterates through and runs each plugin's
-initializer. You can use it to `require` libraries, for example. Remember that
-it's invoked regardless of run mode, so you may not want to perform heavy and
-unnecessary operations here.
-
-
-### `self.setup`
-
-* parameters: none
-* return value: none
-
-This method is invoked just prior to the `self.run` hook. Use this for any setup
-that only needs to run when actually gathering the data.
-
-
-### `self.cleanup`
-
-* parameters: none
-* return value: none
-
-This method is invoked just after to the `self.run` hook. Use this to clean up
-temporary files or any other debris left behind.
-
-
 
 ## Required Hooks
 
@@ -175,7 +181,7 @@ should not be included in a metric unless you simply want to count the number of
 people who have `dev`, `staging`, and `prod` (or other well known) environments.
 
 However, we can also get more complex and records can have subkeys, like `.name`
-or `.version`. To do that, you add an entry for a `RECORD` type that is `REPEATABLE`.
+or `.version`. To do that, you add an entry for a `RECORD` type that is `REPEATED`.
 The `fields` key of that hash is another array that contains items like our first
 example. That item would look like:
 
@@ -284,14 +290,57 @@ modules using our cached module list.
 ``` ruby
 environments = Puppet.lookup(:environments).list.map{|e|e.name}
 modules = environments.map do |env|
-  Puppet.lookup(:environments).get(env).modules.map do|mod|
-    next unless mod.forge_module?
+    Puppet.lookup(:environments).get(env).modules.map do|mod|
+        next unless mod.forge_module?
 
-    {
-      :name    => mod.name,
-      :slug    => mod.forge_slug,
-      :version => mod.version,
-    }
-  end
+        {
+            :name    => mod.name,
+            :slug    => mod.forge_slug,
+            :version => mod.version,
+        }
+    end
 end.flatten.compact.uniq
+
+[
+    { :modules => modules },
+]
 ```
+
+
+## Optional Hooks
+
+These methods are provided for convenience as a way to logically group code. It
+is possible to do initialization, setup, and teardown all in the `.run` hook, but
+this separation allows you to make your code more straightforward to read if you'd
+like to.
+
+### `self.initialize_example`
+
+* parameters: none
+* return value: none
+
+This method is the initializer. It should be named after the metric class. So in
+the `Dropsonde::Metrics::Jvm` example, it would be called `self.initialize_jvm`.
+
+When Dropsonde starts up, it first iterates through and runs each plugin's
+initializer. You can use it to `require` libraries, for example. Remember that
+it's invoked regardless of run mode, so you may not want to perform heavy and
+unnecessary operations here.
+
+
+### `self.setup`
+
+* parameters: none
+* return value: none
+
+This method is invoked just prior to the `self.run` hook. Use this for any setup
+that only needs to run when actually gathering the data.
+
+
+### `self.cleanup`
+
+* parameters: none
+* return value: none
+
+This method is invoked just after to the `self.run` hook. Use this to clean up
+temporary files or any other debris left behind.
