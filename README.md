@@ -46,7 +46,7 @@ See the full schema of all enabled plugins by running the command:
 $ dropsonde schema
 ```
 
-All information in the report is keyed off a non-reversible SHA512 hash site-id
+All information in the report is keyed off a non-reversible SHA512 hashed site-id
 to make it unidentifiable; this report cannot be linked back to you or to your
 infrastructure. Now that said, we know that the more bits of data shared about a
 specific site, the easier it is to fingerprint that site. See
@@ -62,6 +62,8 @@ and aggregate data, but does not include any individual records whatsoever.
 For example, this aggregated data might include records that show a count of how
 many sites are using various combinations of modules together, but it will never
 include a record showing the full list of modules that any single site is using.
+
+![Data aggregation workflow](./aggregation.png)
 
 With your own Google Cloud account, you can use that [dataset](https://console.cloud.google.com/bigquery?p=dataops-puppet-public-data&d=community&t=forge_modules&page=table)
 in your own tooling and you can see/contribute to the aggregation queries in its
