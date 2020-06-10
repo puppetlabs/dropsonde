@@ -22,7 +22,10 @@ class Dropsonde
   flag [:ttl], :default_value => 7, :type => Integer
 
   desc 'List of metrics to omit'
-  flag [:blacklist, :b], :type => Array
+  flag [:disable, :d], :type => Array
+
+  desc 'Only load these metrics'
+  flag [:enable, :e], :type => Array
 
   desc 'Any number or string used to generate the randomized site ID.'
   flag [:seed]
@@ -102,7 +105,7 @@ class Dropsonde
                 This is in jsonl format for direct upload to BigQuery."
     t.command :example do |c|
       c.desc 'How many rows to generate'
-      c.flag [:size], :default_value => 100
+      c.flag [:size], :default_value => 100, :type => Integer
 
       c.desc 'Filename for the output (in jsonl format).'
       c.flag [:filename], :default_value => 'example.jsonl'

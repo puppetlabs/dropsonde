@@ -3,7 +3,7 @@
 Each metric or family of metrics is exposed by a single metrics plugin. It is
 is self contained, with its own documentation and validated data schema. All
 plugins in the `Dropsonde::Metrics` namespace will be loaded, except for those
-blacklisted. This means that to collect new metrics, all you need to do is to
+disabled. This means that to collect new metrics, all you need to do is to
 contribute a metrics plugin and wait for data to come in.
 
 Of course, before you can actually access said data, you'll also need to write some
@@ -40,16 +40,17 @@ is released and the schema incorporated into the submission pipeline. But that's
 not necessary for testing. Dropsonde internally validates each plugin schema and
 ensures that the data gathered matches that schema.
 
-To validate and observe the data your plugin will collect, run:
+To validate and observe the data your plugin will collect use the `preview`
+command and enable only your new plugin:
 
 ``` shell
-$ dropsonde preview
+$ dropsonde --enable jvm preview
 ```
 
 You can also get it in JSON format for machine validation with:
 
 ``` shell
-$ dropsonde preview --format=json
+$ dropsonde --enable jvm preview --format=json
 ```
 
 ### Metric plugin skeleton
@@ -93,9 +94,9 @@ end
 
 ## Flow of Execution
 
-When Dropsonde starts, it first iterates through and loads each (non-blacklisted)
-plugin and invokes its [initializer](#selfinitialize_example). This initializer
-is run unconditionally regardless of the operation being performed.
+When Dropsonde starts, it first iterates through and loads each (enabled) plugin
+and invokes its [initializer](#selfinitialize_example). This initializer is run
+unconditionally regardless of the operation being performed.
 
 Next, depending the operation being performed, all plugins are iterated through
 in slightly different manners.

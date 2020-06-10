@@ -102,7 +102,7 @@ will not report the `:puppetfiles` metrics.
 ``` yaml
 ---
 :update: false
-:blacklist:
+:disable:
   - puppetfiles
 ```
 

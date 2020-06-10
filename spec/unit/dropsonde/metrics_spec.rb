@@ -4,8 +4,8 @@ RSpec.describe Dropsonde::Metrics do
     expect(Dropsonde::Metrics.plugins.size).to eq(Dir.glob('lib/dropsonde/metrics/*').size)
   end
 
-#   it "blacklists plugins" do
-#     Dropsonde.settings[:blacklist] = [:puppetfiles]
+#   it "disables plugins" do
+#     Dropsonde.settings[:disable] = [:puppetfiles]
 #     expect(Dropsonde::Metrics.plugins.size).to eq(Dir.glob('lib/dropsonde/metrics/*').size - 1)
 #   end
 

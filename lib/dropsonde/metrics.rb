@@ -4,7 +4,13 @@ class Dropsonde::Metrics
   extend LittlePlugger( :path => 'dropsonde/metrics', :module => Dropsonde::Metrics)
 
   def initialize
-    Dropsonde::Metrics.disregard_plugins(*Dropsonde.settings[:blacklist])
+    if Dropsonde.settings[:enable]
+      Dropsonde.settings[:disable] ||= []
+      disable = Dropsonde::Metrics.plugins.keys - Dropsonde.settings[:enable].map(&:to_sym)
+      Dropsonde.settings[:disable].concat disable
+    end
+
+    Dropsonde::Metrics.disregard_plugins(*Dropsonde.settings[:disable])
     Dropsonde::Metrics.initialize_plugins
   end
 
@@ -28,9 +34,9 @@ class Dropsonde::Metrics
       str << plugin.description.strip
       str << "\n\n"
     end
-    if Dropsonde.settings[:blacklist]
+    if Dropsonde.settings[:disable]
       str << "Disabled plugins:\n"
-      str << "  #{Dropsonde.settings[:blacklist].join(', ')}"
+      str << "  #{Dropsonde.settings[:disable].join(', ')}"
     end
     str
   end
@@ -50,16 +56,16 @@ class Dropsonde::Metrics
     Dropsonde::Metrics.plugins.each do |name, plugin|
       schema = plugin.schema
 
-      plugin.setup
+      plugin.setup if plugin.respond_to? :setup
       data = sanity_check_data(plugin, plugin.run)
-      plugin.cleanup
+      plugin.cleanup if plugin.respond_to? :cleanup
 
       str << plugin.name+"\n"
       str << "-------------------------------\n"
       str << plugin.description
       data.each do |row|
         key    = row.keys.first
-        values = row.values.first
+        values = row.values.flatten
 
         desc = schema.find {|item| item[:name].to_sym == key.to_sym}[:description]
         str << "- #{key}: #{desc}\n"
@@ -112,6 +118,9 @@ class Dropsonde::Metrics
   # We accept both the plugin and data gathered from the plugin so that
   # we can sanitize both data and example data
   def sanity_check_data(plugin, data)
+    # This allows plugin authors to easily skip metrics with no results
+    return [] if data.nil?
+
     keys_data   = data.map {|item| item.keys }.flatten.map(&:to_s)
     keys_schema = plugin.schema.map {|item| item[:name] }
 
