@@ -77,22 +77,13 @@ class Dropsonde
   end
 
   def self.puppetDB
-    return @@pdbclient if @@pdbclient
-
-    config = File.join(Puppet.settings[:confdir], 'puppetdb.conf')
-
-    return unless File.file? config
-
-    server = IniFile.load(config)['main']['server_urls'].split(',').first
-
-    @@pdbclient = PuppetDB::Client.new({
-      :server => server,
+    @@client ||= ::PuppetDB::Client.new({
+      :server => "#{ENV['PUPPETDB_URL'] || Puppet::Util::Puppetdb.config.server_urls[0]}",
       :pem    => {
-          'key'     => Puppet.settings[:hostprivkey],
-          'cert'    => Puppet.settings[:hostcert],
-          'ca_file' => Puppet.settings[:localcacert],
+        'key'     => ENV['PUPPETDB_KEY_FILE'] || Puppet[:hostprivkey],
+        'cert'    => ENV['PUPPETDB_CERT_FILE'] || Puppet[:hostcert],
+        'ca_file' => ENV['PUPPETDB_CACERT_FILE'] || Puppet[:localcacert],
       }
-    })
+    }, 4)
   end
-
 end
