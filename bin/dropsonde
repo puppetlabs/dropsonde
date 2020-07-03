@@ -30,6 +30,9 @@ class Dropsonde
   desc 'Any number or string used to generate the randomized site ID.'
   flag [:seed]
 
+  desc 'Static site ID'
+  flag [:siteid]
+
   pre do |global, command, options, args|
     Dropsonde.settings = global
     Dropsonde::Cache.init(global[:cachepath], global[:ttl], global[:update])
