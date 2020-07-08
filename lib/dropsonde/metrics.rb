@@ -17,11 +17,16 @@ class Dropsonde::Metrics
   def siteid
     return @siteid if @siteid
 
-    sha2 = Digest::SHA512.new
-    sha2.update Puppet.settings[:certname]
-    sha2.update Puppet.settings[:cacert]
-    sha2.update Dropsonde.settings[:seed] if Dropsonde.settings[:seed]
-    @siteid = sha2.hexdigest
+    @siteid = Dropsonde.settings[:siteid]
+
+    unless @siteid
+      sha2 = Digest::SHA512.new
+      sha2.update Puppet.settings[:certname]
+      sha2.update Puppet.settings[:cacert]
+      sha2.update Dropsonde.settings[:seed] if Dropsonde.settings[:seed]
+      @siteid = sha2.hexdigest
+    end
+
     @siteid
   end
 
