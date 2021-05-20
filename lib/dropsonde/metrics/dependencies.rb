@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# dependencies plugin
 class Dropsonde::Metrics::Dependencies
   def self.initialize_dependencies
     # require any libraries needed here -- no need to load puppet; it's already initialized
@@ -5,10 +8,10 @@ class Dropsonde::Metrics::Dependencies
   end
 
   def self.description
-    <<~EOF
+    <<~DESCRIPTION
       This group of metrics discovers dependencies between modules in all
       environments. It will omit dependencies on private modules.
-    EOF
+    DESCRIPTION
   end
 
   def self.schema
@@ -18,23 +21,23 @@ class Dropsonde::Metrics::Dependencies
       {
         "fields": [
           {
-            "description": "The depended on module name",
-            "mode": "NULLABLE",
-            "name": "name",
-            "type": "STRING"
+            "description": 'The depended on module name',
+            "mode": 'NULLABLE',
+            "name": 'name',
+            "type": 'STRING',
           },
           {
-            "description": "The depended on module version requirement",
-            "mode": "NULLABLE",
-            "name": "version_requirement",
-            "type": "STRING"
-          }
+            "description": 'The depended on module version requirement',
+            "mode": 'NULLABLE',
+            "name": 'version_requirement',
+            "type": 'STRING',
+          },
         ],
-        "description": "List of modules that private modules in all environments depend on.",
-        "mode": "REPEATED",
-        "name": "dependencies",
-        "type": "RECORD"
-      }
+        "description": 'List of modules that private modules in all environments depend on.',
+        "mode": 'REPEATED',
+        "name": 'dependencies',
+        "type": 'RECORD',
+      },
     ]
   end
 
@@ -42,26 +45,25 @@ class Dropsonde::Metrics::Dependencies
     # run just before generating this metric
   end
 
-  def self.run
+  def self.run(_puppetdb_session = nil)
     # return an array of hashes representing the data to be merged into the combined checkin
-    environments = Puppet.lookup(:environments).list.map{|e|e.name}
-    modules = environments.map do |env|
+    environments = Puppet.lookup(:environments).list.map { |e| e.name }
+    modules = environments.map { |env|
       Puppet.lookup(:environments).get(env).modules
-    end.flatten
+    }.flatten
 
     # we want only PUBLIC modules that PRIVATE modules depend on
-    dependencies = modules.map do|mod|
+    dependencies = modules.map { |mod|
       next unless mod.dependencies
-      next if Dropsonde::Cache.forgeModule? mod  # skip unless this is a private module
+      next if Dropsonde::Cache.forge_module? mod # skip unless this is a private module
 
       # and return a list of all public modules it depends on
-      mod.dependencies.select {|mod| Dropsonde::Cache.forgeModule? mod }
-    end.flatten.compact
+      mod.dependencies.select { |dep| Dropsonde::Cache.forge_module? dep }
+    }.flatten.compact
 
     [
-      { :dependencies => dependencies },
+      { dependencies: dependencies },
     ]
-
   end
 
   def self.example
@@ -69,14 +71,17 @@ class Dropsonde::Metrics::Dependencies
     # make it easier to write data aggregation queries without access to the
     # actual private data that users have submitted.
 
+    dropsonde_cache = Dropsonde::Cache.new('foo', 7, true)
     versions = ['>= 1.5.2', '>= 4.3.2', '>= 3.0.0 < 4.0.0', '>= 2.2.1 < 5.0.0', '>= 5.0.0 < 7.0.0', '>= 4.11.0']
     [
-      :dependencies => Dropsonde::Cache.modules
-                                  .sample(rand(250))
-                                  .map {|item| {
-                                    :name                => item,
-                                    :version_requirement => versions.sample,
-                                  }},
+      dependencies: dropsonde_cache.modules
+                                   .sample(rand(250))
+                                   .map do |item|
+                      {
+                        name: item,
+                        version_requirement: versions.sample,
+                      }
+                    end,
     ]
   end
 

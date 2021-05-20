@@ -1,15 +1,16 @@
+# frozen_string_literal: true
+
 RSpec.describe Dropsonde do
   before(:each) do
-    Dropsonde.settings = {}
+    described_class.settings = {}
   end
 
-  it "allows settings to be set" do
-    expect(Dropsonde.settings = {}).to eq({})
-    expect(Dropsonde.settings = {:a => :b}).to eq({:a => :b})
+  it 'allows settings to be set' do
+    expect(described_class.settings = {}).to eq({})
+    expect(described_class.settings = { a: :b }).to eq({ a: :b })
   end
 
   it "raise an error if settings aren't set properly" do
-    expect { Dropsonde.settings = 'bananna' }.to raise_error(RuntimeError)
+    expect { described_class.settings = 'bananna' }.to raise_error(RuntimeError)
   end
-
 end

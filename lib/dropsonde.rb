@@ -1,9 +1,12 @@
+# frozen_string_literal: true
+
 require 'json'
 require 'httpclient'
 require 'puppetdb'
 require 'inifile'
 require 'puppet'
 
+# Dropsonde class documentation
 class Dropsonde
   require 'dropsonde/cache'
   require 'dropsonde/metrics'
@@ -12,15 +15,16 @@ class Dropsonde
 
   Puppet.initialize_settings
 
-  @@pdbclient = nil
-  @@settings  = {}
+  @pdbclient = nil
+  @settings  = {}
   def self.settings=(arg)
     raise "Requires a Hash to set all settings at once, not a #{arg.class}" unless arg.is_a? Hash
-    @@settings = arg
+
+    @settings = arg
   end
 
-  def self.settings
-    @@settings
+  class << self
+    attr_reader :settings
   end
 
   def self.generate_schema
@@ -32,24 +36,23 @@ class Dropsonde
     puts Dropsonde::Metrics.new.list
   end
 
-  def self.generate_report(format)
+  def self.generate_report(format, puppetdb_session = nil)
     case format
     when 'json'
       puts JSON.pretty_generate(Dropsonde::Metrics.new.report)
     when 'human'
       puts
-      puts Dropsonde::Metrics.new.preview
+      puts Dropsonde::Metrics.new.preview(puppetdb_session)
     else
-      raise "unknown format"
+      raise 'unknown format'
     end
   end
 
   def self.submit_report(endpoint, port)
-    client = HTTPClient.new()
+    client = HTTPClient.new
     result = client.post("#{endpoint}:#{port}",
-                  :header => {'Content-Type' => 'application/json'},
-                  :body   => Dropsonde::Metrics.new.report.to_json
-                )
+                         header: { 'Content-Type' => 'application/json' },
+                         body: Dropsonde::Metrics.new.report.to_json)
 
     if result.status == 200
       data = JSON.parse(result.body)
@@ -69,15 +72,15 @@ class Dropsonde
   def self.generate_example(size, filename)
     metrics = Dropsonde::Metrics.new
     File.open(filename, 'w') do |file|
-      for i in 0...size
+      (0...size).each do |_i|
         file.write(metrics.example.to_json)
         file.write("\n")
       end
     end
   end
 
-  def self.puppetDB
-    return @@pdbclient if @@pdbclient
+  def puppet_db
+    return @pdbclient if @pdbclient
 
     config = File.join(Puppet.settings[:confdir], 'puppetdb.conf')
 
@@ -85,14 +88,13 @@ class Dropsonde
 
     server = IniFile.load(config)['main']['server_urls'].split(',').first
 
-    @@pdbclient = PuppetDB::Client.new({
-      :server => server,
-      :pem    => {
-          'key'     => Puppet.settings[:hostprivkey],
-          'cert'    => Puppet.settings[:hostcert],
-          'ca_file' => Puppet.settings[:localcacert],
-      }
-    })
+    @pdbclient = PuppetDB::Client.new({
+                                        server: server,
+                                        pem: {
+                                          'key' => Puppet.settings[:hostprivkey],
+                                          'cert' => Puppet.settings[:hostcert],
+                                          'ca_file' => Puppet.settings[:localcacert],
+                                        },
+                                      })
   end
-
 end

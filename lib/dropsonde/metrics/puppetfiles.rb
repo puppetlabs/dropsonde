@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# puppetfiles plugin
 class Dropsonde::Metrics::Puppetfiles
   def self.initialize_puppetfiles
     # require any libraries needed here -- no need to load puppet; it's already initialized
@@ -6,10 +9,10 @@ class Dropsonde::Metrics::Puppetfiles
   end
 
   def self.description
-    <<~EOF
+    <<~DESCRIPTION
       This generates interesting stats about Puppetfiles used in your environments,
       including whether your Puppetfiles have Ruby code in them.
-    EOF
+    DESCRIPTION
   end
 
   def self.schema
@@ -19,23 +22,23 @@ class Dropsonde::Metrics::Puppetfiles
       {
         "fields": [
           {
-            "description": "The method name",
-            "mode": "NULLABLE",
-            "name": "name",
-            "type": "STRING"
+            "description": 'The method name',
+            "mode": 'NULLABLE',
+            "name": 'name',
+            "type": 'STRING',
           },
           {
-            "description": "How many times is it used",
-            "mode": "NULLABLE",
-            "name": "count",
-            "type": "INTEGER"
-          }
+            "description": 'How many times is it used',
+            "mode": 'NULLABLE',
+            "name": 'count',
+            "type": 'INTEGER',
+          },
         ],
-        "description": "Ruby methods used in Puppetfiles.",
-        "mode": "REPEATED",
-        "name": "puppetfile_ruby_methods",
-        "type": "RECORD"
-      }
+        "description": 'Ruby methods used in Puppetfiles.',
+        "mode": 'REPEATED',
+        "name": 'puppetfile_ruby_methods',
+        "type": 'RECORD',
+      },
     ]
   end
 
@@ -43,30 +46,30 @@ class Dropsonde::Metrics::Puppetfiles
     # run just before generating this metric
   end
 
-  def self.run
-    methods = Dir.entries(Puppet.settings[:environmentpath]).map do |entry|
+  def self.run(_puppetdb_session = nil)
+    methods = Dir.entries(Puppet.settings[:environmentpath]).map { |entry|
       puppetfile = File.join(Puppet.settings[:environmentpath], entry, 'Puppetfile')
 
       next if entry.start_with? '.'
       next unless File.file? puppetfile
 
       tokens  = Ripper.sexp(File.read(puppetfile)).flatten
-      indices = tokens.map.with_index {|a, i| a == :command ? i : nil}.compact
+      indices = tokens.map.with_index { |a, i| a == :command ? i : nil }.compact
 
-      indices.map {|i| tokens[i+2] }
-    end.flatten.compact
+      indices.map { |i| tokens[i + 2] }
+    }.flatten.compact
 
-    methods.reject! {|name| ['mod', 'forge', 'moduledir'].include? name }
+    methods.reject! { |name| %w[mod forge moduledir].include? name }
 
     methods = methods.uniq.map do |name|
       {
-        :name  => name,
-        :count => methods.count(name),
+        name: name,
+        count: methods.count(name),
       }
     end
 
     [
-      { :puppetfile_ruby_methods => methods },
+      { puppetfile_ruby_methods: methods },
     ]
   end
 
@@ -75,13 +78,13 @@ class Dropsonde::Metrics::Puppetfiles
     # make it easier to write data aggregation queries without access to the
     # actual private data that users have submitted.
     [
-      :puppetfile_ruby_methods => [
-        {:name => 'require', :count => rand(200)},
-        {:name => 'each',    :count => rand(200)},
-        {:name => 'puts',    :count => rand(200)},
-        {:name => 'select',  :count => rand(200)},
-        {:name => 'reject',  :count => rand(200)},
-        {:name => 'read',    :count => rand(200)},
+      puppetfile_ruby_methods: [
+        { name: 'require', count: rand(200) },
+        { name: 'each',    count: rand(200) },
+        { name: 'puts',    count: rand(200) },
+        { name: 'select',  count: rand(200) },
+        { name: 'reject',  count: rand(200) },
+        { name: 'read',    count: rand(200) },
       ].shuffle,
     ]
   end
