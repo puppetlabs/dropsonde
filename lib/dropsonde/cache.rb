@@ -56,7 +56,7 @@ class Dropsonde::Cache
       # stop once we reach modules we've already cached
       break if DateTime.parse(iter.first.updated_at) <= newest
 
-      @cache['modules'].concat iter.map { |mod| mod.slug } # rubocop:disable Lint/AmbiguousBlockAssociation
+      @cache['modules'].concat(iter.map { |mod| mod.slug })
 
       iter = iter.next
       print '.'
