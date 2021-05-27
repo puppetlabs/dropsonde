@@ -6,7 +6,9 @@ require 'puppetdb'
 require 'inifile'
 require 'puppet'
 
-# Dropsonde class documentation
+# This class handles caching module process, generate reports,
+# fetchs all plugins defined in lib/dropsonde/metrics and also
+# handle connection and request to PuppetDB.
 class Dropsonde
   require 'dropsonde/cache'
   require 'dropsonde/metrics'
