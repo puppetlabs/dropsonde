@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'little-plugger'
+require 'securerandom'
 
 # metrics class
 class Dropsonde::Metrics
@@ -218,12 +219,6 @@ class Dropsonde::Metrics
   end
 
   def generate_guid
-    [
-      (0..8).to_a.map { |_a| rand(16).to_s(16) }.join,
-      (0..4).to_a.map { |_a| rand(16).to_s(16) }.join,
-      (0..4).to_a.map { |_a| rand(16).to_s(16) }.join,
-      (0..4).to_a.map { |_a| rand(16).to_s(16) }.join,
-      (0..12).to_a.map { |_a| rand(16).to_s(16) }.join,
-    ].join('-')
+    SecureRandom.uuid
   end
 end

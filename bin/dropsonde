@@ -6,7 +6,7 @@ class Dropsonde
   extend GLI::App
 
   @cache = nil
-  @session = Dropsonde.new.puppet_db
+  @puppetdb_session = Dropsonde.new.puppet_db
 
   program_desc 'A simple telemetry tool for Puppet infrastructures'
   config_file  "#{File.dirname(Puppet.settings[:confdir])}/telemetry.yaml"
@@ -62,7 +62,7 @@ class Dropsonde
 
     c.action do |global, options, args|
       @cache.autoupdate
-      Dropsonde.generate_report(options[:format], @session)
+      Dropsonde.generate_report(options[:format], @puppetdb_session)
     end
   end
 
