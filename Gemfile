@@ -21,6 +21,8 @@ group :development do
   gem 'yard'
 end
 
+gem 'bigdecimal', '= 1.4.2', :require => false
+
 # Evaluate Gemfile.local and ~/.gemfile if they exist
 extra_gemfiles = [
   "#{__FILE__}.local",
