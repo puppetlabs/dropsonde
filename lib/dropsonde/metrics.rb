@@ -1,7 +1,11 @@
-require 'little-plugger'
+# frozen_string_literal: true
 
+require 'little-plugger'
+require 'securerandom'
+
+# metrics class
 class Dropsonde::Metrics
-  extend LittlePlugger( :path => 'dropsonde/metrics', :module => Dropsonde::Metrics)
+  extend LittlePlugger(path: 'dropsonde/metrics', module: Dropsonde::Metrics)
 
   def initialize
     if Dropsonde.settings[:enable]
@@ -31,67 +35,67 @@ class Dropsonde::Metrics
   end
 
   def list
-    str  = "                    Loaded telemetry plugins\n"
-    str << "                 ===============================\n\n"
+    str = "                    Loaded telemetry plugins\n"
+    str += "                 ===============================\n\n"
     Dropsonde::Metrics.plugins.each do |name, plugin|
-      str << name.to_s
-      str << "\n--------\n"
-      str << plugin.description.strip
-      str << "\n\n"
+      str += name.to_s
+      str += "\n--------\n"
+      str += plugin.description.strip
+      str += "\n\n"
     end
     if Dropsonde.settings[:disable]
-      str << "Disabled plugins:\n"
-      str << "  #{Dropsonde.settings[:disable].join(', ')}"
+      str += "Disabled plugins:\n"
+      str += "  #{Dropsonde.settings[:disable].join(', ')}"
     end
     str
   end
 
   def schema
     schema = skeleton_schema
-    Dropsonde::Metrics.plugins.each do |name, plugin|
+    Dropsonde::Metrics.plugins.each do |_name, plugin|
       schema.concat(sanity_check_schema(plugin))
     end
     check_for_duplicates(schema)
     schema
   end
 
-  def preview
-    str  = "                      Puppet Telemetry Report Preview\n"
-    str << "                      ===============================\n\n"
-    Dropsonde::Metrics.plugins.each do |name, plugin|
+  def preview(puppetdb_session = nil)
+    str = "                      Puppet Telemetry Report Preview\n"
+    str += "                      ===============================\n\n"
+    Dropsonde::Metrics.plugins.each do |_name, plugin|
       schema = plugin.schema
 
       plugin.setup if plugin.respond_to? :setup
-      data = sanity_check_data(plugin, plugin.run)
+      data = sanity_check_data(plugin, plugin.run(puppetdb_session))
       plugin.cleanup if plugin.respond_to? :cleanup
 
-      str << plugin.name+"\n"
-      str << "-------------------------------\n"
-      str << plugin.description
+      str += "#{plugin.name}\n"
+      str += "-------------------------------\n"
+      str += plugin.description
       data.each do |row|
         key    = row.keys.first
         values = row.values.flatten
 
-        desc = schema.find {|item| item[:name].to_sym == key.to_sym}[:description]
-        str << "- #{key}: #{desc}\n"
+        desc = schema.find { |item| item[:name].to_sym == key.to_sym }[:description]
+        str += "- #{key}: #{desc}\n"
         values.each do |item|
-          str << "    #{item}\n"
+          str += "    #{item}\n"
         end
       end
-      str << "\n\n"
+      str += "\n\n"
     end
-    str << "Site ID:\n"
-    str << siteid
+    str += "Site ID:\n"
+    str += siteid
     str
   end
 
   def report
     snapshots = {}
-    Dropsonde::Metrics.plugins.each do |name, plugin|
+    Dropsonde::Metrics.plugins.each do |_name, plugin|
       plugin.setup
       sanity_check_data(plugin, plugin.run).each do |row|
         snapshots[row.keys.first] = {
-          'value'     => row.values.first,
+          'value' => row.values.first,
           'timestamp' => Time.now.iso8601,
         }
       end
@@ -111,7 +115,7 @@ class Dropsonde::Metrics
     results[:ip]         = IPAddr.new(rand(2**32), Socket::AF_INET)
     results.delete(:'self-service-analytics')
 
-    Dropsonde::Metrics.plugins.each do |name, plugin|
+    Dropsonde::Metrics.plugins.each do |_name, plugin|
       sanity_check_data(plugin, plugin.example).each do |row|
         results.merge!(row)
       end
@@ -126,8 +130,8 @@ class Dropsonde::Metrics
     # This allows plugin authors to easily skip metrics with no results
     return [] if data.nil?
 
-    keys_data   = data.map {|item| item.keys }.flatten.map(&:to_s)
-    keys_schema = plugin.schema.map {|item| item[:name] }
+    keys_data   = data.map { |item| item.keys }.flatten.map(&:to_s)
+    keys_schema = plugin.schema.map { |item| item[:name] }
 
     disallowed = (keys_data - keys_schema)
 
@@ -139,16 +143,16 @@ class Dropsonde::Metrics
   def sanity_check_schema(plugin)
     schema = plugin.schema
 
-    if schema.class != Array or schema.find {|item| item.class != Hash}
+    if (schema.class != Array) || schema.find { |item| item.class != Hash }
       raise "The #{plugin.name} plugin schema is not an array of hashes"
     end
 
     error = ''
     [:name, :type, :description].each do |field|
-      count = schema.reject {|item| item[field] }.count
-      next if count == 0
+      count = schema.reject { |item| item[field] }.count
+      next if count.zero?
 
-      error << "The #{plugin.name} plugin schema has #{count} missing #{field}s\n"
+      error += "The #{plugin.name} plugin schema has #{count} missing #{field}s\n"
     end
     raise error unless error.empty?
 
@@ -156,8 +160,8 @@ class Dropsonde::Metrics
   end
 
   def check_for_duplicates(schema)
-    keys  = schema.map {|col| col[:name] }
-    dupes = keys.select{ |e| keys.count(e) > 1 }.uniq
+    keys  = schema.map { |col| col[:name] }
+    dupes = keys.select { |e| keys.count(e) > 1 }.uniq
 
     raise "The schema defines duplicate keys: #{dupes}" unless dupes.empty?
   end
@@ -166,61 +170,55 @@ class Dropsonde::Metrics
     [
       {
         "description": "An ID that's unique for each checkin to Dujour.",
-        "mode": "NULLABLE",
-        "name": "message_id",
-        "type": "STRING"
+        "mode": 'NULLABLE',
+        "name": 'message_id',
+        "type": 'STRING',
       },
       {
-        "description": "A unique identifier for a site, derived as a hash of the CA certificate and optional seed.",
-        "mode": "NULLABLE",
-        "name": "site_id",
-        "type": "BYTES"
+        "description": 'A unique identifier for a site, derived as a hash of the CA certificate and optional seed.',
+        "mode": 'NULLABLE',
+        "name": 'site_id',
+        "type": 'BYTES',
       },
       {
-        "description": "The name of the product.",
-        "mode": "NULLABLE",
-        "name": "product",
-        "type": "STRING"
+        "description": 'The name of the product.',
+        "mode": 'NULLABLE',
+        "name": 'product',
+        "type": 'STRING',
       },
       {
-        "description": "Version of the project.",
-        "mode": "NULLABLE",
-        "name": "version",
-        "type": "STRING"
+        "description": 'Version of the project.',
+        "mode": 'NULLABLE',
+        "name": 'version',
+        "type": 'STRING',
       },
       {
-        "description": "Time the checkin to Dujour occurred.",
-        "mode": "NULLABLE",
-        "name": "timestamp",
-        "type": "TIMESTAMP"
+        "description": 'Time the checkin to Dujour occurred.',
+        "mode": 'NULLABLE',
+        "name": 'timestamp',
+        "type": 'TIMESTAMP',
       },
       {
-        "description": "IP Address of node checking in to Dujour.",
-        "mode": "NULLABLE",
-        "name": "ip",
-        "type": "STRING"
-      }
+        "description": 'IP Address of node checking in to Dujour.',
+        "mode": 'NULLABLE',
+        "name": 'ip',
+        "type": 'STRING',
+      },
     ]
   end
 
   def skeleton_report
     {
-      "product": "popularity-module",
-      "version": "1.0.0",
+      "product": 'popularity-module',
+      "version": '1.0.0',
       "site_id": siteid,
       "self-service-analytics": {
-        "snapshots": { }
-      }
+        "snapshots": {},
+      },
     }
   end
 
   def generate_guid
-    "%s-%s-%s-%s-%s" % [
-      (0..8).to_a.map{|a| rand(16).to_s(16)}.join,
-      (0..4).to_a.map{|a| rand(16).to_s(16)}.join,
-      (0..4).to_a.map{|a| rand(16).to_s(16)}.join,
-      (0..4).to_a.map{|a| rand(16).to_s(16)}.join,
-      (0..12).to_a.map{|a| rand(16).to_s(16)}.join
-    ]
+    SecureRandom.uuid
   end
 end

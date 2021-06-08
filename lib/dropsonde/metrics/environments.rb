@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# environments plugin
 class Dropsonde::Metrics::Environments
   def self.initialize_environments
     # Require any libraries needed here -- no need to load puppet or puppetdb;
@@ -7,20 +10,20 @@ class Dropsonde::Metrics::Environments
 
   def self.description
     # This is a Ruby squiggle heredoc; just a multi-line string with indentation removed
-    <<~EOF
+    <<~DESCRIPTION
       This group of metrics gathers information about environments.
-    EOF
+    DESCRIPTION
   end
 
   def self.schema
     # return an array of hashes of a partial schema to be merged into the complete schema
     [
       {
-        "description": "The number of environments",
-        "mode": "NULLABLE",
-        "name": "environment_count",
-        "type": "INTEGER"
-      }
+        "description": 'The number of environments',
+        "mode": 'NULLABLE',
+        "name": 'environment_count',
+        "type": 'INTEGER',
+      },
     ]
   end
 
@@ -28,10 +31,10 @@ class Dropsonde::Metrics::Environments
     # run just before generating this metric
   end
 
-  def self.run
+  def self.run(_puppetdb_session = nil)
     # return an array of hashes representing the data to be merged into the combined checkin
     [
-      :environment_count => Puppet.lookup(:environments).list.count,
+      environment_count: Puppet.lookup(:environments).list.count,
     ]
   end
 
@@ -40,7 +43,7 @@ class Dropsonde::Metrics::Environments
     # make it easier to write data aggregation queries without access to the
     # actual private data that users have submitted.
     [
-      :environment_count => rand(1..100),
+      environment_count: rand(1..100),
     ]
   end
 

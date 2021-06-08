@@ -1,34 +1,37 @@
+# frozen_string_literal: true
+
 require 'date'
 require 'json'
 require 'fileutils'
 require 'puppet_forge'
 
+# cache class
 class Dropsonde::Cache
-  @@autoupdate = false
+  @autoupdate = false
 
-  def self.init(path, ttl, autoupdate)
+  def initialize(path, ttl, autoupdate)
     FileUtils.mkdir_p(path)
-    @@path = "#{File.expand_path(path)}/forge.json"
-    @@ttl  = ttl
-    @@autoupdate = autoupdate
+    @path = "#{File.expand_path(path)}/forge.json"
+    @ttl  = ttl
+    @autoupdate = autoupdate
 
-    if File.file? @@path
-      @@cache = JSON.parse(File.read(@@path))
-    else
-      @@cache = {
-                'timestamp' => '2000-1-1',  # long before any puppet modules were released!
-                'modules'   => [],
-              }
-    end
+    @cache = if File.file? @path
+               JSON.parse(File.read(@path))
+             else
+               {
+                 'timestamp' => '2000-1-1', # long before any puppet modules were released!
+                 'modules' => [],
+               }
+             end
 
-    PuppetForge.user_agent = "Dropsonde Telemetry Client/0.0.1"
+    PuppetForge.user_agent = 'Dropsonde Telemetry Client/0.0.1'
   end
 
-  def self.modules
-    @@cache['modules']
+  def modules
+    @cache['modules']
   end
 
-  def self.forgeModule?(mod)
+  def self.forge_module?(mod)
     case mod
     when Puppet::Module
       modname = mod.forge_slug
@@ -39,45 +42,42 @@ class Dropsonde::Cache
     end
     return unless modname
 
-    modules.include? modname.tr('/','-')
+    modules.include? modname.tr('/', '-')
   end
 
-  def self.update
-    puts "Updating module cache..."
-    iter   = PuppetForge::Module.all(:sort_by => 'latest_release')
-    newest = DateTime.parse(@@cache['timestamp'])
+  def update
+    puts 'Updating module cache...'
+    iter   = PuppetForge::Module.all(sort_by: 'latest_release')
+    newest = DateTime.parse(@cache['timestamp'])
 
-    @@cache['timestamp'] = iter.first.updated_at
+    @cache['timestamp'] = iter.first.updated_at
 
     until iter.next.nil?
       # stop once we reach modules we've already cached
       break if DateTime.parse(iter.first.updated_at) <= newest
 
-      @@cache['modules'].concat iter.map {|mod| mod.slug }
+      @cache['modules'].concat(iter.map { |mod| mod.slug })
 
       iter = iter.next
       print '.'
     end
     puts
-    @@cache['modules'].sort!
-    @@cache['modules'].uniq!
+    @cache['modules'].sort!
+    @cache['modules'].uniq!
 
-    File.write(@@path, JSON.pretty_generate(@@cache))
+    File.write(@path, JSON.pretty_generate(@cache))
   end
 
-  def self.autoupdate
-    return unless @@autoupdate
+  def autoupdate
+    return unless @autoupdate
 
-    unless File.file? @@path
-      puts "Dropsonde caches a list of all Forge modules to ensure that it only reports"
-      puts "usage data on public modules. Generating this cache may take some time on"
+    unless File.file? @path
+      puts 'Dropsonde caches a list of all Forge modules to ensure that it only reports'
+      puts 'usage data on public modules. Generating this cache may take some time on'
       puts "the first run and you'll see your screen fill up with dots."
       update
     end
 
-    if (Date.today - File.mtime(@@path).to_date).to_i > @@ttl
-      update
-    end
+    return update if (Date.today - File.mtime(@path).to_date).to_i > @ttl
   end
-
 end
