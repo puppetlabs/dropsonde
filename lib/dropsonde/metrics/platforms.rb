@@ -82,7 +82,7 @@ class Dropsonde::Metrics::Platforms
     }.compact
 
     data.each do |item|
-      item['count'] = data.select { |i|
+      item[:count] = data.select { |i|
         i[:name] == item[:name] and i[:platform] == item[:platform]
       }.count
     end

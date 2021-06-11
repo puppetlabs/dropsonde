@@ -11,7 +11,6 @@ RSpec.describe Dropsonde::Cache do
 
     expect(File).to receive(:file?).with(%r{foo/forge.json}).and_return(false)
 
-    # dropsonde_cache.init('foo', 7, true)
     expect(dropsonde_cache.instance_variable_get(:@cache)).to eq(default)
   end
 
@@ -24,7 +23,6 @@ RSpec.describe Dropsonde::Cache do
     expect(File).to receive(:file?).with(%r{foo/forge.json}).and_return(true)
     expect(File).to receive(:read).with(%r{foo/forge.json}).and_return(cache.to_json)
 
-    # dropsonde_cache.init('foo', 7, true)
     expect(dropsonde_cache.instance_variable_get(:@cache)).to eq(cache)
   end
 
@@ -41,7 +39,6 @@ RSpec.describe Dropsonde::Cache do
     expect(File).to receive(:file?).with(%r{foo/forge.json}).and_return(true)
     expect(dropsonde_cache).not_to receive(:update)
 
-    # dropsonde_cache.init('foo', 7, true)
     dropsonde_cache.autoupdate
   end
 
@@ -58,7 +55,38 @@ RSpec.describe Dropsonde::Cache do
     expect(File).to receive(:file?).with(%r{foo/forge.json}).and_return(true)
     expect(dropsonde_cache).to receive(:update).and_return(true)
 
-    # dropsonde_cache.init('foo', 7, true)
     dropsonde_cache.autoupdate
+  end
+
+  it 'updates successfuly when all modules are already cached' do
+    allow(PuppetForge::Module).to receive(:all).with(sort_by: 'latest_release').and_return(
+      [
+        OpenStruct.new(
+          slug: 'puppet-module_a',
+          updated_at: '2000-1-1',
+        ),
+        OpenStruct.new(
+          slug: 'puppet-module_b',
+          updated_at: '2000-1-1',
+        ),
+      ].each,
+    )
+    expect { dropsonde_cache.update }.not_to raise_error
+  end
+
+  it 'updates successfuly with newest modules releases' do
+    allow(PuppetForge::Module).to receive(:all).with(sort_by: 'latest_release').and_return(
+      [
+        OpenStruct.new(
+          slug: 'puppet-module_a',
+          updated_at: '2000-2-1', # a date after latest cache
+        ),
+        OpenStruct.new(
+          slug: 'puppet-module_b',
+          updated_at: '2000-2-1', # a date after latest cache
+        ),
+      ].each,
+    )
+    expect { dropsonde_cache.update }.not_to raise_error
   end
 end
