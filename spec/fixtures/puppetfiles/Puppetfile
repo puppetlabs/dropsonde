@@ -1,0 +1,5 @@
+puts 'this is a test'
+
+test 'this module'
+
+mod 'puppet-testing'
