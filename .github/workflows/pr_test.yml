@@ -1,0 +1,80 @@
+name: "Acceptance Tests"
+
+on: [pull_request]
+
+env:
+  HONEYCOMB_WRITEKEY: 7f3c63a70eecc61d635917de46bea4e6
+  HONEYCOMB_DATASET: litmus tests
+
+jobs:
+  Spec:
+    name: Acceptance Tests
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby_version:
+          - 2.7
+
+    env:
+      BUILDEVENT_FILE: '../buildevents.txt'
+      RVM_GEM_VERSION: ${{ matrix.ruby_version }}
+
+    steps:
+      - run: |
+          echo "SANITIZED_RUBY_VERSION=$(echo '${{ matrix.ruby_version }}' | sed 's/~> //g')" >> $GITHUB_ENV
+      - run: |
+          echo 'ruby_version=${{ env.SANITIZED_RUBY_VERSION }}' >> $BUILDEVENT_FILE
+      - name: "Honeycomb: Start first step"
+        run: |
+          echo "STEP_ID=${{ env.SANITIZED_RUBY_VERSION }}-spec" >> $GITHUB_ENV
+          echo STEP_START=$(date +%s) >> $GITHUB_ENV
+      - name: "Honeycomb: Start recording"
+        uses: puppetlabs/kvrhdn-gha-buildevents@pdk-templates-v1
+        with:
+          apikey: ${{ env.HONEYCOMB_WRITEKEY }}
+          dataset: ${{ env.HONEYCOMB_DATASET }}
+          job-status: ${{ job.status }}
+          matrix-key: ${{ env.SANITIZED_RUBY_VERSION }}
+
+      - name: Checkout Source
+        uses: actions/checkout@v2
+
+      - name: "Activate Ruby ${{ matrix.ruby_version }}"
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby_version }}
+          bundler-cache: true
+
+      - name: Print bundle environment
+        run: |
+          echo ::group::bundler environment
+          buildevents cmd $TRACE_ID $STEP_ID 'bundle env' -- bundle env
+          echo ::endgroup::
+      - name: bundle install
+        run: |
+          buildevents cmd $TRACE_ID $STEP_ID 'bundle install' -- bundle install
+
+      - name: Spec prep
+        run: |
+          buildevents cmd $TRACE_ID $STEP_ID 'bundle exec rake spec_prep' -- bundle exec rake spec_prep
+
+      - name: Provision agents
+        run: |
+          buildevents cmd $TRACE_ID $STEP_ID 'bolt plan run dropsonde::provision_agents' -- bundle exec bolt plan run dropsonde::provision_agents --modulepath ./spec/fixtures/modules/
+
+      - name: Install puppet-agent on agents nodes
+        run: |
+          buildevents cmd $TRACE_ID $STEP_ID 'bolt plan run dropsonde::agents_setup' -- bundle exec bolt plan run dropsonde::agents_setup --modulepath ./spec/fixtures/modules/ --inventory ./spec/fixtures/litmus_inventory.yaml
+
+      - name: Run Acceptance Tests
+        run: |
+          buildevents cmd $TRACE_ID $STEP_ID 'bundle exec rake dropsonde:acceptance' -- bundle exec rake dropsonde:acceptance
+      
+      - name: Tear down
+        run: |
+          buildevents cmd $TRACE_ID $STEP_ID 'rake litmus:tear_down' -- bundle exec rake litmus:tear_down
+
+      - name: Remove docker containers
+        run: |
+          buildevents cmd $TRACE_ID $STEP_ID 'docker rm --all' -- docker rm $(docker ps -aq) -f

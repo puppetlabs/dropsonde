@@ -12,6 +12,9 @@ group :test do
   gem 'rubocop-rake', '~> 0.5'
   gem 'codecov', '~> 0.1'
   gem 'simplecov', '~> 0.18'
+  gem 'puppet_litmus', :require => false
+  gem 'bolt', :require => false
+  gem 'puppetlabs_spec_helper', :require => false
 end
 
 group :development do

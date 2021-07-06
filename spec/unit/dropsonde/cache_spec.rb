@@ -11,7 +11,7 @@ RSpec.describe Dropsonde::Cache do
 
     expect(File).to receive(:file?).with(%r{foo/forge.json}).and_return(false)
 
-    expect(dropsonde_cache.instance_variable_get(:@cache)).to eq(default)
+    expect(dropsonde_cache.cache).to eq(default)
   end
 
   it 'loads cache from disk' do
@@ -23,7 +23,7 @@ RSpec.describe Dropsonde::Cache do
     expect(File).to receive(:file?).with(%r{foo/forge.json}).and_return(true)
     expect(File).to receive(:read).with(%r{foo/forge.json}).and_return(cache.to_json)
 
-    expect(dropsonde_cache.instance_variable_get(:@cache)).to eq(cache)
+    expect(dropsonde_cache.cache).to eq(cache)
   end
 
   it 'does not attempt to autoupdate before ttl has expired' do

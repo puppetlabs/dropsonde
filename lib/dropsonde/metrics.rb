@@ -3,7 +3,12 @@
 require 'little-plugger'
 require 'securerandom'
 
-# metrics class
+# @author Ben Ford
+# @summary
+#   This class loads all plugins defined lib/dropsonde/metrics directory,
+#   generate a full report running each plugin over your infrastructure,
+#   sanitizing the data to match with the schema and also check the schema
+#   to be valid according with Google Big Query schemas
 class Dropsonde::Metrics
   extend LittlePlugger(path: 'dropsonde/metrics', module: Dropsonde::Metrics)
 

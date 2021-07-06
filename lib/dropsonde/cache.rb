@@ -15,20 +15,24 @@ class Dropsonde::Cache
     @ttl  = ttl
     @autoupdate = autoupdate
 
-    @cache = if File.file? @path
-               JSON.parse(File.read(@path))
-             else
-               {
-                 'timestamp' => '2000-1-1', # long before any puppet modules were released!
-                 'modules' => [],
-               }
-             end
+    @@cache = if File.file? @path # rubocop:disable Style/ClassVars
+                JSON.parse(File.read(@path))
+              else
+                {
+                  'timestamp' => '2000-1-1', # long before any puppet modules were released!
+                  'modules' => [],
+                }
+              end
 
     PuppetForge.user_agent = 'Dropsonde Telemetry Client/0.0.1'
   end
 
   def modules
-    @cache['modules']
+    @@cache['modules']
+  end
+
+  def cache
+    @@cache
   end
 
   def self.forge_module?(mod)
@@ -42,30 +46,30 @@ class Dropsonde::Cache
     end
     return unless modname
 
-    modules.include? modname.tr('/', '-')
+    @@cache['modules'].include? modname.tr('/', '-')
   end
 
   def update
     puts 'Updating module cache...'
     iter   = PuppetForge::Module.all(sort_by: 'latest_release')
-    newest = DateTime.parse(@cache['timestamp'])
+    newest = DateTime.parse(@@cache['timestamp'])
 
-    @cache['timestamp'] = iter.first.updated_at
+    @@cache['timestamp'] = iter.first.updated_at
 
     until iter.next.nil?
       # stop once we reach modules we've already cached
       break if DateTime.parse(iter.first.updated_at) <= newest
 
-      @cache['modules'].concat(iter.map { |mod| mod.slug })
+      @@cache['modules'].concat(iter.map { |mod| mod.slug })
 
       iter = iter.next
       print '.'
     end
     puts
-    @cache['modules'].sort!
-    @cache['modules'].uniq!
+    @@cache['modules'].sort!
+    @@cache['modules'].uniq!
 
-    File.write(@path, JSON.pretty_generate(@cache))
+    File.write(@path, JSON.pretty_generate(@@cache))
   end
 
   def autoupdate

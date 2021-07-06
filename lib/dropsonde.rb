@@ -6,9 +6,16 @@ require 'puppetdb'
 require 'inifile'
 require 'puppet'
 
-# This class handles caching module process, generate reports,
-# fetchs all plugins defined in lib/dropsonde/metrics and also
-# handle connection and request to PuppetDB.
+# Class: Dropsonde
+#
+#   This class exists to serve as fixture data for testing the puppet strings face
+#
+# @example
+#   class { "test": }
+#
+# @param package_name The name of the package
+# @param service_name The name of the service
+# @param myenum
 class Dropsonde
   require 'dropsonde/cache'
   require 'dropsonde/metrics'
@@ -84,7 +91,8 @@ class Dropsonde
   def puppet_db
     return @pdbclient if @pdbclient
 
-    config = File.join(Puppet.settings[:confdir], 'puppetdb.conf')
+    # Puppet.settings[:confdir]
+    config = File.join('/etc/puppetlabs/puppet/', 'puppetdb.conf')
 
     return unless File.file? config
 
