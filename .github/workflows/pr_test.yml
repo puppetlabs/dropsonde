@@ -59,13 +59,29 @@ jobs:
         run: |
           buildevents cmd $TRACE_ID $STEP_ID 'bundle exec rake spec_prep' -- bundle exec rake spec_prep
 
-      - name: Provision agents
+      - name: Provision Postgres
+        run: |
+          buildevents cmd $TRACE_ID $STEP_ID 'bolt plan run dropsonde::provision_postgres' -- bundle exec bolt plan run dropsonde::provision_postgres --modulepath ./spec/fixtures/modules/
+
+      - name: Provision Puppet Server
+        run: |
+          buildevents cmd $TRACE_ID $STEP_ID 'bolt plan run dropsonde::provision_puppetserver' -- bundle exec bolt plan run dropsonde::provision_puppetserver --modulepath ./spec/fixtures/modules/
+
+      - name: Provision PuppetDB
+        run: |
+          buildevents cmd $TRACE_ID $STEP_ID 'bolt plan run dropsonde::provision_puppetdb' -- bundle exec bolt plan run dropsonde::provision_puppetdb --modulepath ./spec/fixtures/modules/ --inventory ./spec/fixtures/litmus_inventory.yaml
+
+      - name: Provision Agents
         run: |
           buildevents cmd $TRACE_ID $STEP_ID 'bolt plan run dropsonde::provision_agents' -- bundle exec bolt plan run dropsonde::provision_agents --modulepath ./spec/fixtures/modules/
 
-      - name: Install puppet-agent on agents nodes
+      - name: Install and Setup Puppet Agents
         run: |
           buildevents cmd $TRACE_ID $STEP_ID 'bolt plan run dropsonde::agents_setup' -- bundle exec bolt plan run dropsonde::agents_setup --modulepath ./spec/fixtures/modules/ --inventory ./spec/fixtures/litmus_inventory.yaml
+
+      - name: Config Puppet Infrastructure
+        run: |
+          buildevents cmd $TRACE_ID $STEP_ID 'bolt plan run dropsonde::config_infra' -- bundle exec bolt plan run dropsonde::config_infra --modulepath ./spec/fixtures/modules/ --inventory ./spec/fixtures/litmus_inventory.yaml
 
       - name: Run Acceptance Tests
         run: |
@@ -74,7 +90,3 @@ jobs:
       - name: Tear down
         run: |
           buildevents cmd $TRACE_ID $STEP_ID 'rake litmus:tear_down' -- bundle exec rake litmus:tear_down
-
-      - name: Remove docker containers
-        run: |
-          buildevents cmd $TRACE_ID $STEP_ID 'docker rm --all' -- docker rm $(docker ps -aq) -f

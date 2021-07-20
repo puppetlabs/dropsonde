@@ -5,7 +5,7 @@ require 'json'
 
 describe 'dropsonde' do
   context 'when update' do
-    let(:shell_result) { run_shell('docker exec puppet dropsonde update') }
+    let(:shell_result) { run_shell('dropsonde update') }
 
     it 'works' do
       expect(shell_result.exit_code).to eq(0)
@@ -13,7 +13,7 @@ describe 'dropsonde' do
   end
 
   context 'when list' do
-    let(:shell_result) { run_shell('docker exec puppet dropsonde list') }
+    let(:shell_result) { run_shell('dropsonde list') }
 
     it 'works' do
       expect(shell_result.exit_code).to eq(0)
@@ -41,7 +41,7 @@ describe 'dropsonde' do
   end
 
   context 'when preview' do
-    let(:shell_result) { run_shell('docker exec puppet dropsonde preview --format json') }
+    let(:shell_result) { run_shell('dropsonde preview --format json') }
     let(:plugins) { JSON.parse(shell_result.stdout)['self-service-analytics']['snapshots'] }
 
     it 'works' do
@@ -64,12 +64,12 @@ describe 'dropsonde' do
 
   context 'when dev' do
     it 'schema is executed' do
-      shell_result = run_shell('docker exec puppet dropsonde dev schema')
+      shell_result = run_shell('dropsonde dev schema')
       expect(shell_result.exit_code).to eq(0)
     end
 
     it 'example is executed' do
-      shell_result = run_shell('docker exec puppet dropsonde dev example')
+      shell_result = run_shell('dropsonde dev example')
       expect(shell_result.exit_code).to eq(0)
     end
   end

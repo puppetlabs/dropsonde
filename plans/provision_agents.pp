@@ -1,5 +1,5 @@
 plan dropsonde::provision_agents(
-  Optional[String] $using = 'docker',
+  Optional[String] $using = 'docker_exp',
   Optional[Array[String]] $images = ['litmusimage/centos:7', 'litmusimage/debian:9']
 ) {
   # provision machines, set roles
@@ -11,7 +11,7 @@ plan dropsonde::provision_agents(
       'localhost',
       action => 'provision',
       platform => $images[$index],
-      vars => "role: agent\ndocker_run_opts: ['--hostname', 'agent${hostname_count}']"
+      vars => "role: agent${hostname_count}\ndocker_run_opts: ['--hostname', 'agent${hostname_count}']"
     )
   }
 }
