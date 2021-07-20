@@ -78,6 +78,14 @@ jobs:
       - name: Install and Setup Puppet Agents
         run: |
           buildevents cmd $TRACE_ID $STEP_ID 'bolt plan run dropsonde::agents_setup' -- bundle exec bolt plan run dropsonde::agents_setup --modulepath ./spec/fixtures/modules/ --inventory ./spec/fixtures/litmus_inventory.yaml
+          echo ::group::=== INVENTORY ===
+          if [[ -f 'spec/fixtures/litmus_inventory.yaml' ]]; then
+            FILE='spec/fixtures/litmus_inventory.yaml'
+          elif [[ -f 'inventory.yaml' ]]; then
+            FILE='inventory.yaml'
+          fi
+          sed -e 's/password: .*/password: "[redacted]"/' < $FILE || true
+          echo ::endgroup::
 
       - name: Config Puppet Infrastructure
         run: |
