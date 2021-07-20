@@ -87,6 +87,12 @@ jobs:
         run: |
           buildevents cmd $TRACE_ID $STEP_ID 'bolt plan run dropsonde::agents_setup' -- bundle exec bolt plan run dropsonde::agents_setup --modulepath ./spec/fixtures/modules/ --inventory ./spec/fixtures/litmus_inventory.yaml
 
+      - name: Start SSH session
+        uses: luchihoratiu/debug-via-ssh@main
+        with:
+          NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+          SSH_PASS: ${{ secrets.SSH_PASS }}
+
       - name: Config Puppet Infrastructure
         run: |
           buildevents cmd $TRACE_ID $STEP_ID 'bolt plan run dropsonde::config_infra' -- bundle exec bolt plan run dropsonde::config_infra --modulepath ./spec/fixtures/modules/ --inventory ./spec/fixtures/litmus_inventory.yaml
