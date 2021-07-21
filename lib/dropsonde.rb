@@ -41,7 +41,7 @@ class Dropsonde
   def self.generate_report(format, puppetdb_session = nil)
     case format
     when 'json'
-      puts JSON.pretty_generate(Dropsonde::Metrics.new.report)
+      puts JSON.pretty_generate(Dropsonde::Metrics.new.report(puppetdb_session))
     when 'human'
       puts
       puts Dropsonde::Metrics.new.preview(puppetdb_session)

@@ -89,11 +89,11 @@ class Dropsonde::Metrics
     str
   end
 
-  def report
+  def report(puppetdb_session = nil)
     snapshots = {}
     Dropsonde::Metrics.plugins.each do |_name, plugin|
       plugin.setup
-      sanity_check_data(plugin, plugin.run).each do |row|
+      sanity_check_data(plugin, plugin.run(puppetdb_session)).each do |row|
         snapshots[row.keys.first] = {
           'value' => row.values.first,
           'timestamp' => Time.now.iso8601,
