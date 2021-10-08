@@ -52,6 +52,15 @@ class Dropsonde
 
   def self.submit_report(endpoint, port)
     client = HTTPClient.new
+
+    # The httpclient gem ships with some expired CA certificates.
+    # This causes us to load the certs shipped with whatever
+    # Ruby is used to execute this gem's commands, which are generally
+    # more up-to-date, especially if using puppet-agent's Ruby.
+    #
+    # Note that this is no-op with Windows system Ruby.
+    client.ssl_config.set_default_paths
+
     result = client.post("#{endpoint}:#{port}",
                          header: { 'Content-Type' => 'application/json' },
                          body: Dropsonde::Metrics.new.report.to_json)
