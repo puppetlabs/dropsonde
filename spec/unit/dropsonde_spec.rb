@@ -55,7 +55,10 @@ RSpec.describe Dropsonde do
   end
 
   context 'when submit report' do
-    let(:http_client) { double }
+    let(:http_client) {
+      double("client",
+             ssl_config: double("ssl_config", set_default_paths: "foo"))
+    }
     let(:report) { double }
     let(:report_tojson) { double }
     let(:telemetry_report) { JSON.parse('{ "foo": "bar" }') }
