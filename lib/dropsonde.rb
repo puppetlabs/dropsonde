@@ -15,7 +15,32 @@ class Dropsonde
   require 'dropsonde/monkeypatches'
   require 'dropsonde/version'
 
-  Puppet.initialize_settings
+  def self.puppet_settings_overrides
+    overrides = []
+    if confdir = ENV['PUPPET_CONFDIR']
+      overrides << '--confdir'
+      overrides << confdir
+    end
+
+    if codedir = ENV['PUPPET_CODEDIR']
+      overrides << '--codedir'
+      overrides << codedir
+    end
+
+    if vardir = ENV['PUPPET_VARDIR']
+      overrides << '--vardir'
+      overrides << vardir
+    end
+
+    if logdir = ENV['PUPPET_LOGDIR']
+      overrides << '--logdir'
+      overrides << logdir
+    end
+
+    overrides
+  end
+
+  Puppet.initialize_settings(puppet_settings_overrides)
 
   @pdbclient = nil
   @settings  = {}
