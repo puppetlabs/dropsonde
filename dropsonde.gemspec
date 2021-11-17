@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.date              = Date.today.to_s
   s.summary           = "A simple telemetry probe for gathering usage information about Puppet infrastructures."
   s.homepage          = "https://github.com/puppetlabs/dropsonde"
-  s.license           = 'Apache 2'
+  s.license           = 'Apache-2.0'
   s.email             = "ben.ford@puppet.com"
   s.authors           = ["Ben Ford"]
   s.require_path      = "lib"
