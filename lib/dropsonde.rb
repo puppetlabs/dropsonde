@@ -17,22 +17,22 @@ class Dropsonde
 
   def self.puppet_settings_overrides
     overrides = []
-    if confdir = ENV['PUPPET_CONFDIR']
+    if (confdir = ENV['PUPPET_CONFDIR'])
       overrides << '--confdir'
       overrides << confdir
     end
 
-    if codedir = ENV['PUPPET_CODEDIR']
+    if (codedir = ENV['PUPPET_CODEDIR'])
       overrides << '--codedir'
       overrides << codedir
     end
 
-    if vardir = ENV['PUPPET_VARDIR']
+    if (vardir = ENV['PUPPET_VARDIR'])
       overrides << '--vardir'
       overrides << vardir
     end
 
-    if logdir = ENV['PUPPET_LOGDIR']
+    if (logdir = ENV['PUPPET_LOGDIR'])
       overrides << '--logdir'
       overrides << logdir
     end
