@@ -15,8 +15,7 @@ data in a way that lets you signal approval simply by using a module is the
 primary goal of this project.
 
 > **This means that the best way for you to help yourself find new modules is to
-> install this telemetry tool and, along with your peers, share your module usage
-> data.** ✅
+> opt in and use this telemetry tool to share your module usage data.** ✅
 
 
 ## Design
@@ -34,11 +33,16 @@ You can see exactly what will be phoned home by running the command:
 $ dropsonde preview
 ```
 
-Dropsonde is a simple telemetry probe designed to run as a regular cron job.
-Metrics are defined by plugins that gather data, but also export a schema that
-constrains the data allowed to be reported on. Dropsonde will reject metrics
-that don't meet these constraints. The backend database is also defined by this
-schema so the system cannot gather any data that's not described in the schema.
+> *Note:* as of Puppetserver 7.5.0, Dropsonde is bundled in as a standard `puppetserver`
+> command. You should run it as `puppetserver dropsonde` (or `/opt/puppetlabs/bin/puppetserver
+> dropsonde` if your `$PATH` isn't configured.)
+
+Dropsonde is a simple telemetry probe designed to run both as a command-line
+tool and optionally as a regularly scheduled task. Metrics are defined by
+plugins that gather data, but also export a schema that constrains the data
+allowed to be reported on. Dropsonde will reject metrics that don't meet these
+constraints. The backend database is also defined by this schema so the system
+cannot gather any data that's not described in the schema.
 
 See the full schema of all enabled plugins by running the command:
 
@@ -87,9 +91,11 @@ possible: [privacy@puppet.com](mailto:privacy@puppet.com)
 
 ## Installation
 
-This is distributed as a Ruby gem. Simply `gem install dropsonde`. There's a
-[Puppet module](https://github.com/puppetlabs/puppetlabs-dropsonde) to manage it
-if that's more your thing.
+As of Puppetserver 7.5.0, Dropsonde is bundled in as a standard `puppetserver`
+command. If you're running an older version, you can install it yourself with
+`gem install dropsonde` or let the
+[Puppet module](https://github.com/puppetlabs/puppetlabs-dropsonde) manage it
+for you.
 
 
 ## Configuration
@@ -106,7 +112,29 @@ will not report the `:puppetfiles` metrics.
   - puppetfiles
 ```
 
-The `puppetlabs-dropsonde` Puppet module manages this configuration for you.
+The [`puppetlabs-dropsonde`](https://github.com/puppetlabs/puppetlabs-dropsonde)
+Puppet module manages this configuration for you.
+
+
+## Scheduled Reporting
+
+Dropsonde is intended to run on a regular schedule to submit usage reports back
+to Puppet. The [`puppetlabs-dropsonde`](https://github.com/puppetlabs/puppetlabs-dropsonde)
+Puppet module will manage this for you, or you can follow the instructions below
+to configure a schedule manually.
+
+If you're running Puppetserver 7.5.0 or above, it's already set up so you can
+simply opt in. Add or update the following stanza of
+`/etc/puppetlabs/puppetserver/conf.d/puppetserver.conf`:
+
+``` hocon
+dropsonde: {
+    enabled: true
+}
+```
+
+If you're running an older version of Puppetserver, then create a cron job that
+runs `dropsonde submit` once a week.
 
 
 ## Running
@@ -139,7 +167,7 @@ Developer comands
 
 ## Architecture
 
-Dropsonde is a simple telemetry probe designed to run as a regular cron job. It
+Dropsonde is a simple telemetry probe designed to run as a scheduled task. It
 will gather metrics defined by self-contained plugins that each defines its own
 partial schema and then gathers the data to meet that schema.
 
@@ -155,7 +183,8 @@ of modules is updated.
 
 ## Limitations
 
-This is super early in development and has not yet been battle tested.
+The output format of individual metrics is not yet formally defined. If you write
+tooling to use it, then make your tooling resilient to changes.
 
 
 Contact
