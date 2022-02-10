@@ -114,13 +114,13 @@ in this order:
 ## Helper Methods
 
 The `puppet` library is loaded, so you can use it to gather any information about
-that master you'd like. Some examples include:
+that server you'd like. Some examples include:
 
 * `Puppet.lookup(:environments)`
 * `Puppet.settings`
 
 We've also loaded the [PuppetDB](https://github.com/voxpupuli/puppetdb-ruby)
-library. It's initialized with that master's own configuration and exposed to you
+library. It's initialized with that server's own configuration and exposed to you
 as `Dropsonde.puppetDB`. So for example, you could could get a list of all
 classes used in the infrastructure with this PQL query:
 
