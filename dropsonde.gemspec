@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.authors           = ["Ben Ford"]
   s.require_path      = "lib"
   s.executables       = %w( dropsonde )
-  s.files             = %w( README.md LICENSE )
+  s.files             = %w( README.md LICENSE CHANGELOG.md )
   s.files            += Dir.glob("lib/**/*")
   s.files            += Dir.glob("bin/**/*")
   s.add_dependency      "json"
