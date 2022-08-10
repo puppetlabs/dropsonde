@@ -212,15 +212,12 @@ class Dropsonde::Metrics::Modules
                    count: rand(750),
                  }
                end,
-      unused: dropsonde_cache.modules
+      unused_modules: dropsonde_cache.modules
                              .sample(rand(500))
-                             .map do |item|
-                {
-                  name: item.split('-').last,
-                  slug: item,
-                  version: versions.sample,
-                }
-              end,
+                             .map { |item| item.split('-').last },
+      unused_classes: dropsonde_cache.modules
+                            .sample(rand(500))
+                            .map { |item| item.split('-').last.capitalize + classes.sample },
     ]
   end
 
