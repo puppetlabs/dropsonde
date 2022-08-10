@@ -64,6 +64,32 @@ class Dropsonde::Metrics::Modules
         "name": 'classes',
         "type": 'RECORD',
       },
+      {
+        "fields": [
+          {
+            "description": 'The module name',
+            "mode": 'NULLABLE',
+            "name": 'name',
+            "type": 'STRING',
+          },
+          {
+            "description": 'The module slug (author-name)',
+            "mode": 'NULLABLE',
+            "name": 'slug',
+            "type": 'STRING',
+          },
+          {
+            "description": 'The module version',
+            "mode": 'NULLABLE',
+            "name": 'version',
+            "type": 'STRING',
+          },
+        ],
+        "description": 'List of modules without classes declared in any environments.',
+        "mode": 'REPEATED',
+        "name": 'unused',
+        "type": 'RECORD',
+      }
     ]
   end
 
@@ -102,13 +128,20 @@ class Dropsonde::Metrics::Modules
           count: results.count { |row| row['title'] == title },
         }
       }.compact
+
+      used_mods = (classes.collect { |c| c[:name].split('::')[0].downcase }).uniq.sort
+      unused = modules.reject { |mod|
+        used_mods.include? mod[:name]
+      }
     else
       classes = []
+      unused  = []
     end
 
     [
       { modules: modules },
       { classes: classes },
+      { unused: unused }
     ]
   end
 
@@ -138,6 +171,15 @@ class Dropsonde::Metrics::Modules
                    count: rand(750),
                  }
                end,
+      unused: dropsonde_cache.modules
+                             .sample(rand(500))
+                             .map do |item|
+                {
+                  name: item.split('-').last,
+                  slug: item,
+                  version: versions.sample,
+                }
+              end,
     ]
   end
 
