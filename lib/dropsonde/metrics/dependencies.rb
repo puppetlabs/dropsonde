@@ -71,7 +71,7 @@ class Dropsonde::Metrics::Dependencies
     # make it easier to write data aggregation queries without access to the
     # actual private data that users have submitted.
 
-    dropsonde_cache = Dropsonde::Cache.new('foo', 7, true)
+    dropsonde_cache = Dropsonde::Cache.new()
     versions = ['>= 1.5.2', '>= 4.3.2', '>= 3.0.0 < 4.0.0', '>= 2.2.1 < 5.0.0', '>= 5.0.0 < 7.0.0', '>= 4.11.0']
     [
       dependencies: dropsonde_cache.modules
