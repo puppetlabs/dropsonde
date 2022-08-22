@@ -119,9 +119,8 @@ class Dropsonde::Metrics::Modules
 
     versions = ['1.3.2', '0.0.1', '0.1.2', '1.0.0', '3.0.2', '7.10', '6.1.0', '2.1.0', '1.4.0']
     classes = ['', '::Config', '::Service', '::Server', '::Client', '::Packages']
-    dropsonde_cache = Dropsonde::Cache.new()
     [
-      modules: dropsonde_cache.modules
+      modules: Dropsonde::Cache.modules
                               .sample(rand(100))
                               .map do |item|
                  {
@@ -130,7 +129,7 @@ class Dropsonde::Metrics::Modules
                    version: versions.sample,
                  }
                end,
-      classes: dropsonde_cache.modules
+      classes: Dropsonde::Cache.modules
                               .sample(rand(500))
                               .map do |item|
                  {

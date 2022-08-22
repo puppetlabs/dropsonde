@@ -11,8 +11,6 @@ class Dropsonde::Cache
   @autoupdate = false
 
   def initialize(path='~/.dropsonde', ttl=7, autoupdate=true)
-    return if @@cache # make the class singleton
-
     path = File.expand_path(path)
     FileUtils.mkdir_p(path)
     @path = "#{path}/forge.json"
@@ -31,8 +29,12 @@ class Dropsonde::Cache
     PuppetForge.user_agent = 'Dropsonde Telemetry Client/0.0.1'
   end
 
-  def modules
+  def self.modules
     @@cache['modules']
+  end
+
+  def modules
+    Dropsonde::Cache.modules
   end
 
   def cache
