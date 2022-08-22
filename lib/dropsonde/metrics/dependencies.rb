@@ -74,8 +74,8 @@ class Dropsonde::Metrics::Dependencies
     versions = ['>= 1.5.2', '>= 4.3.2', '>= 3.0.0 < 4.0.0', '>= 2.2.1 < 5.0.0', '>= 5.0.0 < 7.0.0', '>= 4.11.0']
     [
       dependencies: Dropsonde::Cache.modules
-                                   .sample(rand(250))
-                                   .map do |item|
+                                    .sample(rand(250))
+                                    .map do |item|
                       {
                         name: item,
                         version_requirement: versions.sample,

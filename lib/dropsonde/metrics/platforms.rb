@@ -101,8 +101,8 @@ class Dropsonde::Metrics::Platforms
     classes   = ['', '::Config', '::Service', '::Server', '::Client', '::Packages']
 
     data = Dropsonde::Cache.modules
-                          .sample(rand(35))
-                          .map { |item|
+                           .sample(rand(35))
+                           .map { |item|
       name = item.split('-').last.capitalize + classes.sample
 
       rand(5).times.map do

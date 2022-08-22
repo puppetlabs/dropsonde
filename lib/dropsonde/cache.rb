@@ -7,10 +7,10 @@ require 'puppet_forge'
 
 # cache class
 class Dropsonde::Cache
-  @@cache = nil
+  @@cache = nil # rubocop:disable Style/ClassVars
   @autoupdate = false
 
-  def initialize(path='~/.dropsonde', ttl=7, autoupdate=true)
+  def initialize(path = '~/.dropsonde', ttl = 7, autoupdate = true) # rubocop:disable Style/OptionalBooleanParameter
     path = File.expand_path(path)
     FileUtils.mkdir_p(path)
     @path = "#{path}/forge.json"

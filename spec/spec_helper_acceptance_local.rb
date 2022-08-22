@@ -28,14 +28,15 @@ def run_local_command(command, opts = {})
 end
 
 class CISest
-  def classes_per_environment(env_hash)
+  def classes_per_environment(_env_hash)
     {
       production:
-        {'/etc/puppetlabs/code/environments/production/modules/stdlib/manifests/init.pp':
+        {
+          '/etc/puppetlabs/code/environments/production/modules/stdlib/manifests/init.pp':
           {
-            classes: [ { name: 'stdlib' } ]
-          }
-        }
+            classes: [{ name: 'stdlib' }],
+          },
+        },
     }
   end
 end
