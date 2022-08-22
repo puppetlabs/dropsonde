@@ -100,8 +100,7 @@ class Dropsonde::Metrics::Platforms
     platforms = %w[RedHat Debian Windows Suse FreeBSD Darwin Archlinux AIX]
     classes   = ['', '::Config', '::Service', '::Server', '::Client', '::Packages']
 
-    dropsonde_cache = Dropsonde::Cache.new('foo', 7, true)
-    data = dropsonde_cache.modules
+    data = Dropsonde::Cache.modules
                           .sample(rand(35))
                           .map { |item|
       name = item.split('-').last.capitalize + classes.sample

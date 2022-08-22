@@ -7,11 +7,13 @@ require 'puppet_forge'
 
 # cache class
 class Dropsonde::Cache
+  @@cache = nil
   @autoupdate = false
 
-  def initialize(path, ttl, autoupdate)
+  def initialize(path='~/.dropsonde', ttl=7, autoupdate=true)
+    path = File.expand_path(path)
     FileUtils.mkdir_p(path)
-    @path = "#{File.expand_path(path)}/forge.json"
+    @path = "#{path}/forge.json"
     @ttl  = ttl
     @autoupdate = autoupdate
 
@@ -27,8 +29,12 @@ class Dropsonde::Cache
     PuppetForge.user_agent = 'Dropsonde Telemetry Client/0.0.1'
   end
 
-  def modules
+  def self.modules
     @@cache['modules']
+  end
+
+  def modules
+    Dropsonde::Cache.modules
   end
 
   def cache
