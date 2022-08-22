@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'ostruct'
+require 'puppet/info_service'
+require 'puppet/info_service/class_information_service'
 
 def run_local_command(command, opts = {})
   result = Open3.capture3(command)
@@ -25,6 +27,19 @@ def run_local_command(command, opts = {})
   )
 end
 
+class CISest
+  def classes_per_environment(env_hash)
+    {
+      production:
+        {'/etc/puppetlabs/code/environments/production/modules/stdlib/manifests/init.pp':
+          {
+            classes: [ { name: 'stdlib' } ]
+          }
+        }
+    }
+  end
+end
+
 RSpec.configure do |c|
   c.formatter = :documentation
   c.before :each do
@@ -39,6 +54,7 @@ RSpec.configure do |c|
                                                                                                      { name: 'puppetlabs/stdlib', version_requirement: '>= 3.2.0 < 8.0.0' },
                                                                                                      { name: 'puppetlabs/resource_api', version_requirement: '>= 1.0.0 < 2.0.0' },
                                                                                                    ],
+                                                                                                   all_manifests: [],
                                                                                                  ),
                                                                                                  OpenStruct.new(
                                                                                                    name: 'apache',
@@ -49,6 +65,7 @@ RSpec.configure do |c|
                                                                                                      { name: 'puppetlabs/stdlib', version_requirement: '>= 4.13.1 < 8.0.0' },
                                                                                                      { name: 'puppetlabs/concat', version_requirement: '>= 2.2.1 < 8.0.0' },
                                                                                                    ],
+                                                                                                   all_manifests: [],
                                                                                                  ),
                                                                                                  OpenStruct.new(
                                                                                                    name: 'concat',
@@ -56,6 +73,7 @@ RSpec.configure do |c|
                                                                                                    version: '7.0.1',
                                                                                                    forge_module?: true,
                                                                                                    dependencies: [{ name: 'puppetlabs/stdlib', version_requirement: '>= 4.13.1 < 8.0.0' }],
+                                                                                                   all_manifests: [],
                                                                                                  ),
                                                                                                  OpenStruct.new(
                                                                                                    name: 'stdlib',
@@ -63,6 +81,7 @@ RSpec.configure do |c|
                                                                                                    version: '7.0.1',
                                                                                                    forge_module?: true,
                                                                                                    dependencies: [],
+                                                                                                   all_manifests: ['/etc/puppetlabs/code/environments/production/modules/stdlib/manifests/init.pp'],
                                                                                                  ),
                                                                                                  OpenStruct.new(
                                                                                                    name: 'my_private_module',
@@ -75,7 +94,9 @@ RSpec.configure do |c|
                                                                                                      { name: 'puppetlabs/powershell', version_requirement: '>= 2.1.4 < 6.0.0' },
                                                                                                      { name: 'puppetlabs/reboot', version_requirement: '>=2.0.0 < 5.0.0' },
                                                                                                    ],
+                                                                                                   all_manifests: [],
                                                                                                  ),
                                                                                                ]))
+    allow(Puppet::InfoService::ClassInformationService).to receive(:new).and_return(CISest.new)
   end
 end

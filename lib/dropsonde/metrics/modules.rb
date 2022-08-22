@@ -5,6 +5,8 @@ class Dropsonde::Metrics::Modules
   def self.initialize_modules
     # require any libraries needed here -- no need to load puppet; it's already initialized
     # All plugins are initialized before any metrics are generated.
+    require 'puppet/info_service'
+    require 'puppet/info_service/class_information_service'
   end
 
   def self.description
@@ -64,6 +66,46 @@ class Dropsonde::Metrics::Modules
         "name": 'classes',
         "type": 'RECORD',
       },
+      {
+        "fields": [
+          {
+            "description": 'The module name',
+            "mode": 'NULLABLE',
+            "name": 'name',
+            "type": 'STRING',
+          },
+          {
+            "description": 'The module slug (author-name)',
+            "mode": 'NULLABLE',
+            "name": 'slug',
+            "type": 'STRING',
+          },
+          {
+            "description": 'The module version',
+            "mode": 'NULLABLE',
+            "name": 'version',
+            "type": 'STRING',
+          },
+        ],
+        "description": 'List of modules whose classes are not declared in any environments.',
+        "mode": 'REPEATED',
+        "name": 'unused_modules',
+        "type": 'RECORD',
+      },
+      {
+        "fields": [
+          {
+            "description": 'The class name',
+            "mode": 'NULLABLE',
+            "name": 'name',
+            "type": 'STRING',
+          },
+        ],
+        "description": 'List of unused classes in all environments.',
+        "mode": 'REPEATED',
+        "name": 'unused_classes',
+        "type": 'RECORD',
+      },
     ]
   end
 
@@ -102,13 +144,45 @@ class Dropsonde::Metrics::Modules
           count: results.count { |row| row['title'] == title },
         }
       }.compact
+
+      # now lets get a list of all classes so we can identify which are unused
+      infoservice = Puppet::InfoService::ClassInformationService.new
+      env_hash = {}
+      environments.each { |env|
+        manifests = Puppet.lookup(:environments).get(env).modules.inject([]) {|acc, mod|
+          next acc unless mod.forge_module?
+
+          acc.concat mod.all_manifests
+        }
+        env_hash[env] = manifests
+      }
+
+      klasses_per_env = infoservice.classes_per_environment(env_hash)
+
+      installed_classes = klasses_per_env.inject([]) {|acc, (key, env)|
+        names = env.inject([]) {|acc, (file, contents)|
+          acc.concat contents[:classes].map {|c| c[:name] }
+        }
+
+        acc.concat names
+      }
+
+      unused_modules = installed_classes.map {|c| c.split('::').first }.sort.uniq
+      classes.each {|c| unused_modules.delete(c[:name].split('::').first.downcase) }
+
+      unused_classes = installed_classes.dup
+      classes.each {|c| unused_classes.delete(c[:name].downcase) }
     else
       classes = []
+      unused_modules  = []
+      unused_classes  = []
     end
 
     [
       { modules: modules },
       { classes: classes },
+      { unused_modules: unused_modules },
+      { unused_classes: unused_classes }
     ]
   end
 
@@ -138,6 +212,12 @@ class Dropsonde::Metrics::Modules
                    count: rand(750),
                  }
                end,
+      unused_modules: dropsonde_cache.modules
+                             .sample(rand(500))
+                             .map { |item| item.split('-').last },
+      unused_classes: dropsonde_cache.modules
+                            .sample(rand(500))
+                            .map { |item| item.split('-').last.capitalize + classes.sample },
     ]
   end
 
