@@ -148,30 +148,30 @@ class Dropsonde::Metrics::Modules
       # now lets get a list of all classes so we can identify which are unused
       infoservice = Puppet::InfoService::ClassInformationService.new
       env_hash = {}
-      environments.each { |env|
-        manifests = Puppet.lookup(:environments).get(env).modules.inject([]) {|acc, mod|
+      environments.each do |env|
+        manifests = Puppet.lookup(:environments).get(env).modules.reduce([]) do |acc, mod|
           next acc unless mod.forge_module?
 
           acc.concat mod.all_manifests
-        }
+        end
         env_hash[env] = manifests
-      }
+      end
 
       klasses_per_env = infoservice.classes_per_environment(env_hash)
 
-      installed_classes = klasses_per_env.inject([]) {|acc, (key, env)|
-        names = env.inject([]) {|acc, (file, contents)|
-          acc.concat contents[:classes].map {|c| c[:name] }
-        }
+      installed_classes = klasses_per_env.reduce([]) do |klasses, (_key, env)|
+        names = env.reduce([]) do |acc, (_file, contents)|
+          acc.concat(contents[:classes].map { |c| c[:name] })
+        end
 
-        acc.concat names
-      }
+        klasses.concat names
+      end
 
-      unused_modules = installed_classes.map {|c| c.split('::').first }.sort.uniq
-      classes.each {|c| unused_modules.delete(c[:name].split('::').first.downcase) }
+      unused_modules = installed_classes.map { |c| c.split('::').first }.sort.uniq
+      classes.each { |c| unused_modules.delete(c[:name].split('::').first.downcase) }
 
       unused_classes = installed_classes.dup
-      classes.each {|c| unused_classes.delete(c[:name].downcase) }
+      classes.each { |c| unused_classes.delete(c[:name].downcase) }
     else
       classes = []
       unused_modules  = []
@@ -182,7 +182,7 @@ class Dropsonde::Metrics::Modules
       { modules: modules },
       { classes: classes },
       { unused_modules: unused_modules },
-      { unused_classes: unused_classes }
+      { unused_classes: unused_classes },
     ]
   end
 
@@ -195,8 +195,8 @@ class Dropsonde::Metrics::Modules
     classes = ['', '::Config', '::Service', '::Server', '::Client', '::Packages']
     [
       modules: Dropsonde::Cache.modules
-                              .sample(rand(100))
-                              .map do |item|
+                               .sample(rand(100))
+                               .map do |item|
                  {
                    name: item.split('-').last,
                    slug: item,
@@ -204,19 +204,19 @@ class Dropsonde::Metrics::Modules
                  }
                end,
       classes: Dropsonde::Cache.modules
-                              .sample(rand(500))
-                              .map do |item|
+                               .sample(rand(500))
+                               .map do |item|
                  {
                    name: item.split('-').last.capitalize + classes.sample,
                    count: rand(750),
                  }
                end,
       unused_modules: Dropsonde::Cache.modules
-                             .sample(rand(500))
-                             .map { |item| item.split('-').last },
+                                      .sample(rand(500))
+                                      .map { |item| item.split('-').last },
       unused_classes: Dropsonde::Cache.modules
-                            .sample(rand(500))
-                            .map { |item| item.split('-').last.capitalize + classes.sample },
+                                      .sample(rand(500))
+                                      .map { |item| item.split('-').last.capitalize + classes.sample },
     ]
   end
 

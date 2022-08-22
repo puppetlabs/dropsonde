@@ -54,7 +54,7 @@ class Dropsonde::Metrics::Puppetfiles
       next unless File.file? puppetfile
 
       tokens  = Ripper.sexp(File.read(puppetfile)).flatten
-      indices = tokens.map.with_index { |a, i| a == :command ? i : nil }.compact
+      indices = tokens.map.with_index { |a, i| (a == :command) ? i : nil }.compact
 
       indices.map { |i| tokens[i + 2] }
     }.flatten.compact
