@@ -1,11 +1,25 @@
 # Changelog
 
-## [0.0.7](https://github.com/puppetlabs/dropsonde/tree/0.0.7) (2022-02-10)
+## [0.0.8](https://github.com/puppetlabs/dropsonde/tree/0.0.8) (2022-08-29)
 
-[Full Changelog](https://github.com/puppetlabs/dropsonde/compare/v0.0.6...0.0.7)
+[Full Changelog](https://github.com/puppetlabs/dropsonde/compare/v0.0.7...0.0.8)
 
 **Merged pull requests:**
 
+- \[maint\] correct cache [\#29](https://github.com/puppetlabs/dropsonde/pull/29) ([binford2k](https://github.com/binford2k))
+- \[maint\] rubocop style fixes [\#28](https://github.com/puppetlabs/dropsonde/pull/28) ([binford2k](https://github.com/binford2k))
+- Fix example generation [\#27](https://github.com/puppetlabs/dropsonde/pull/27) ([binford2k](https://github.com/binford2k))
+- unused modules [\#26](https://github.com/puppetlabs/dropsonde/pull/26) ([binford2k](https://github.com/binford2k))
+- Adding changelog generation to Rakefile [\#23](https://github.com/puppetlabs/dropsonde/pull/23) ([binford2k](https://github.com/binford2k))
+
+## [v0.0.7](https://github.com/puppetlabs/dropsonde/tree/v0.0.7) (2022-02-10)
+
+[Full Changelog](https://github.com/puppetlabs/dropsonde/compare/v0.0.6...v0.0.7)
+
+**Merged pull requests:**
+
+- Releasing v00.7 [\#22](https://github.com/puppetlabs/dropsonde/pull/22) ([binford2k](https://github.com/binford2k))
+- Releasing v00.7 [\#21](https://github.com/puppetlabs/dropsonde/pull/21) ([binford2k](https://github.com/binford2k))
 - update server language [\#20](https://github.com/puppetlabs/dropsonde/pull/20) ([binford2k](https://github.com/binford2k))
 - Updates the telemetry endpoint to a stable URL [\#19](https://github.com/puppetlabs/dropsonde/pull/19) ([MikaelSmith](https://github.com/MikaelSmith))
 - docs updates now that it's shipped [\#18](https://github.com/puppetlabs/dropsonde/pull/18) ([binford2k](https://github.com/binford2k))
