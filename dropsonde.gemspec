@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   s.add_dependency      "httpclient"
   s.add_dependency      "little-plugger"
   s.add_dependency      "puppet"
-  s.add_dependency      "puppet_forge"
+  s.add_dependency      "puppet_forge",      "~> 3"
   s.add_dependency      "semantic_puppet"
   s.add_dependency      "inifile"
   s.add_dependency      "puppetdb-ruby"
