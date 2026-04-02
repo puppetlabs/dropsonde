@@ -25,6 +25,7 @@ Gem::Specification.new do |s|
   s.add_dependency      "semantic_puppet"
   s.add_dependency      "inifile"
   s.add_dependency      "puppetdb-ruby"
+  s.add_dependency      "locale", "< 2.1.5"
 
   s.description       = <<~desc
   Dropsonde is a simple telemetry probe designed to run as a regular cron job. It
