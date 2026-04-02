@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.9](https://github.com/puppetlabs/dropsonde/tree/0.0.9) (2026-04-02)
+
+[Full Changelog](https://github.com/puppetlabs/dropsonde/compare/v0.0.8...0.0.9)
+
+**Merged pull requests:**
+
+- \(MAINT\) Pin locale-2.1.4 [\#33](https://github.com/puppetlabs/dropsonde/pull/33) ([beechtom](https://github.com/beechtom))
+
 ## [0.0.8](https://github.com/puppetlabs/dropsonde/tree/0.0.8) (2022-08-29)
 
 [Full Changelog](https://github.com/puppetlabs/dropsonde/compare/v0.0.7...0.0.8)
