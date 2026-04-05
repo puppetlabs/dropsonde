@@ -34,15 +34,15 @@ RSpec.shared_examples 'platforms_spec' do |plugin, plugin_name|
         },
       ],
     )
-    allow(puppet_db).to receive(:request).with('', 'facts[certname, value] { name = "osfamily" }').and_return(facts)
+    allow(puppet_db).to receive(:request).with('', 'inventory[certname, facts.os.family] {}').and_return(facts)
     allow(facts).to receive(:data).and_return(
       [
         {
-          'value' => 'linux',
+          'facts.os.family' => 'linux',
           'certname' => 'aaa',
         },
         {
-          'value' => 'windows',
+          'facts.os.family' => 'windows',
           'certname' => 'bbb',
         },
       ],

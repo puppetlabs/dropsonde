@@ -57,7 +57,7 @@ class Dropsonde::Metrics::Platforms
     return unless puppetdb_session
 
     classes = puppetdb_session.puppet_db.request('', 'resources[certname, title] { type = "Class" }').data
-    facts   = puppetdb_session.puppet_db.request('', 'facts[certname, value] { name = "osfamily" }').data
+    facts   = puppetdb_session.puppet_db.request('', 'inventory[certname, facts.os.family] {}').data
 
     # All public Forge modules that are installed.
     modules = Puppet.lookup(:environments).list.map { |env|
@@ -73,7 +73,7 @@ class Dropsonde::Metrics::Platforms
 
       item['platform'] = facts.find { |fact|
         fact['certname'] == item['certname']
-      }['value']
+      }['facts.os.family']
 
       {
         name: item['title'],
